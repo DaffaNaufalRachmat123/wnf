@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="bilangan_bulat">
+        <item>Pengertian Bilangan Bulat</item>
+        <item>Operasi Hitung Pada Bilangan Bulat</item>
+        <item>Sifat - Sifat Operasi Bilangan Bulat</item>
+        <item>Pangkat dan Akar Pangkat Pada Bilangan Bulat</item>
+    </string-array>
+
+    <string-array name="bilangan_pecahan">
+        <item>Pengertian Bilangan Pecahan</item>
+        <item>Macam - Macam Bilangan Pecahan</item>
+        <item>Operasi Hitung pada Bilangan Pecahan</item>
+    </string-array>
+</resources>

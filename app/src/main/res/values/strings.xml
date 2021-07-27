@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">WNF</string>
+    <string name="wnf">WNF</string>
+    <string name="singkatan_wnf">Whole Number and Fraction</string>
+    <string name="start">Mulai</string>
+
+    <string name="materi_bilangan_bulat">Materi Bilangan Bulat</string>
+    <string name="materi_bilangan_pecahan">Materi Bilangan Pecahan</string>
+    <string name="example">\textbf{Perkalian merupakan penjumlahan secara\\ berulang-ulang. Contoh : }
+\\\textbf{Berlaku : }
+\\\quad\quad\bullet \textbf{a x b}</string>
+</resources>
