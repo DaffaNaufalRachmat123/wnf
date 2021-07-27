@@ -36,7 +36,7 @@ public class ActivityHome extends AppCompatActivity {
         btnQuiz.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                startActivity(new Intent(getApplicationContext() , ActivityQuiz.class));
             }
         });
 
