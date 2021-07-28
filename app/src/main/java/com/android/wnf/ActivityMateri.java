@@ -55,7 +55,7 @@ public class ActivityMateri extends AppCompatActivity {
         materiAdapter.setMateriClickListener(new MateriAdapter.MateriClickListener() {
             @Override
             public void onClick(int position) {
-                startActivity(new Intent(getApplicationContext() , ActivityParentMateri.class));
+                startActivity(new Intent(getApplicationContext() , ActivitySubMateri.class));
             }
         });
         recyclerViewMateri.setHasFixedSize(true);

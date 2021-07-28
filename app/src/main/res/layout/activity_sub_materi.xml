@@ -17,7 +17,7 @@
         android:text="Materi Bilangan Bulat"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="20dp"
         android:paddingTop="10dp"
         android:paddingBottom="10dp"
         app:layout_constraintStart_toStartOf="parent"
@@ -25,7 +25,7 @@
         app:layout_constraintTop_toTopOf="parent"/>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewMateri"
+        android:id="@+id/recyclerViewSubMateri"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:scrollbars="vertical"
@@ -41,9 +41,20 @@
         android:id="@+id/icHome"
         android:layout_width="75dp"
         android:layout_height="75dp"
-        android:layout_marginBottom="15dp"
-        app:srcCompat="@drawable/ic_home_large"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/icBack"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/ic_home_large" />
+
+    <ImageView
+        android:id="@+id/icBack"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:rotation="180"
+        android:paddingTop="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/ic_arrow_black" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
