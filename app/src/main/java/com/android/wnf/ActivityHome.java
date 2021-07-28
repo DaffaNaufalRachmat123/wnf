@@ -43,7 +43,7 @@ public class ActivityHome extends AppCompatActivity {
         btnTentang.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                startActivity(new Intent(getApplicationContext() , ActivityAbout.class));
             }
         });
     }

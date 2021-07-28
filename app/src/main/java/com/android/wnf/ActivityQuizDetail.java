@@ -5,6 +5,7 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -15,17 +16,62 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatTextView;
 
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.ProgressiveMediaSource;
+import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DataSpec;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.upstream.RawResourceDataSource;
+import com.google.android.exoplayer2.util.Util;
+
 import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class ActivityQuizDetail extends AppCompatActivity {
+public class ActivityQuizDetail extends AppCompatActivity implements Player.EventListener {
     private AppCompatTextView questionText , minuteText;
     private ImageView icStateSound , icSound;
     private SeekBar seekBar;
-    private MediaPlayer player;
     private boolean isPlaying = false;
     private int currentVolume = 0;
+    private Handler mHandler = new Handler();
+    private SimpleExoPlayer exoPlayer;
+    private boolean dragging = false;
+    private void updateProgressBar() {
+        long duration = exoPlayer == null ? 0 : exoPlayer.getDuration();
+        long position = exoPlayer == null ? 0 : exoPlayer.getCurrentPosition();
+        if (!dragging) {
+            //seekBar.setProgress(progressBarValue(position));
+        }
+        long bufferedPosition = exoPlayer == null ? 0 : exoPlayer.getBufferedPosition();
+        //seekBar.setSecondaryProgress(progressBarValue(bufferedPosition));
+        // Remove scheduled updates.
+        mHandler.removeCallbacks(updateProgressAction);
+        // Schedule an update if necessary.
+        int playbackState = exoPlayer == null ? Player.STATE_IDLE : exoPlayer.getPlaybackState();
+        if (playbackState != Player.STATE_IDLE && playbackState != Player.STATE_ENDED) {
+            long delayMs;
+            if (exoPlayer.getPlayWhenReady() && playbackState == Player.STATE_READY) {
+                delayMs = 1000 - (position % 1000);
+                if (delayMs < 200) {
+                    delayMs += 1000;
+                }
+            } else {
+                delayMs = 1000;
+            }
+            mHandler.postDelayed(updateProgressAction, delayMs);
+        }
+    }
+
+    private final Runnable updateProgressAction = new Runnable() {
+        @Override
+        public void run() {
+            updateProgressBar();
+        }
+    };
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,99 +85,91 @@ public class ActivityQuizDetail extends AppCompatActivity {
                 play();
             }
         });
-
     }
+
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(player != null){
-            player.start();
-            player.reset();
-            player.release();
-            player = null;
+        if(exoPlayer != null){
+            exoPlayer.stop(true);
+            exoPlayer.release();
+            exoPlayer = null;
         }
         resetVolume();
     }
 
     private void initializePlayer(){
-        player = MediaPlayer.create(this , R.raw.boruto_opening);
-        player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                if(player != null){
-                    player.stop();
-                    player.reset();
-                    player.release();
-                    player = null;
-                    isPlaying = false;
-                    resetVolume();
-                    seekBar.setProgress(0);
-                    icStateSound.setImageResource(R.drawable.ic_play);
-                    initializePlayer();
-                }
-            }
-        });
-        Toast.makeText(this , String.valueOf(player.getDuration()) , Toast.LENGTH_LONG).show();
-        new Thread(){
-            @Override
-            public void run() {
-
-            }
-        };
+        exoPlayer = new SimpleExoPlayer.Builder(this).build();
+        exoPlayer.addListener(this);
+        if(getMediaSourceFromRaw() != null){
+            exoPlayer.setMediaSource(getMediaSourceFromRaw());
+            exoPlayer.prepare();
+            Toast.makeText(ActivityQuizDetail.this , String.valueOf(exoPlayer.getDuration()) , Toast.LENGTH_LONG).show();
+        }
+    }
+    private MediaSource getMediaSourceFromRaw(){
+        RawResourceDataSource rawSource = new RawResourceDataSource(this);
+        try {
+            rawSource.open(new DataSpec(RawResourceDataSource.buildRawResourceUri(R.raw.boruto_opening)));
+            DefaultDataSourceFactory dataSource = new DefaultDataSourceFactory(this , Util.getUserAgent(this , "ExoAudio"));
+            MediaItem mediaItem = MediaItem.fromUri(rawSource.getUri());
+            return new ProgressiveMediaSource.Factory(dataSource).createMediaSource(mediaItem);
+        } catch (RawResourceDataSource.RawResourceDataSourceException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
     private void setSeekBar(){
-        seekBar.setMax(player.getDuration());
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if(player != null){
-                    player.seekTo(progress);;
+                if(exoPlayer != null){
+                    exoPlayer.seekTo(progress);;
                 }
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                if(player != null){
-                    player.pause();
+                if(exoPlayer != null){
+                    exoPlayer.pause();
                     icStateSound.setImageResource(R.drawable.ic_play);
                 }
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                if(player != null){
-                    player.start();
+                if(exoPlayer != null){
+                    exoPlayer.setPlayWhenReady(true);
+                    exoPlayer.seekTo(exoPlayer.getCurrentPosition());
                     icStateSound.setImageResource(R.drawable.ic_pause);
                 }
             }
         });
-        /*new Timer().scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                if(player != null){
-                    seekBar.setProgress(player.getCurrentPosition());
-                }
-            }
-        } , 0 , 100);*/
     }
     private void play(){
         if(!isPlaying){
-            if(player != null){
+            if(exoPlayer != null){
                 maxVolume();
-                player.start();
+                exoPlayer.setPlayWhenReady(true);
                 isPlaying = true;
                 icStateSound.setImageResource(R.drawable.ic_pause);
             }
         } else {
-            if(player != null){
+            if(exoPlayer != null){
                 resetVolume();
-                player.pause();
+                exoPlayer.pause();
                 isPlaying = false;
                 icStateSound.setImageResource(R.drawable.ic_play);
             }
         }
     }
+
+    @Override
+    public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+        updateProgressBar();
+    }
+
     private void maxVolume(){
         AudioManager manager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
         currentVolume = manager.getStreamVolume(AudioManager.STREAM_MUSIC);

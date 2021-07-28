@@ -3,6 +3,7 @@ package com.android.wnf;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -10,6 +11,7 @@ import androidx.appcompat.widget.AppCompatButton;
 
 public class ActivityQuiz extends AppCompatActivity {
     private AppCompatButton btnQuiz1 , btnQuiz2 , btnQuiz3 , btnQuiz4;
+    private ImageView icHome;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -18,11 +20,19 @@ public class ActivityQuiz extends AppCompatActivity {
         btnQuiz2 = findViewById(R.id.btnQuiz2);
         btnQuiz3 = findViewById(R.id.btnQuiz3);
         btnQuiz4 = findViewById(R.id.btnQuiz4);
+        icHome = findViewById(R.id.icHome);
 
         btnQuiz1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(getApplicationContext() , ActivityQuizDetail.class));
+            }
+        });
+
+        icHome.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
             }
         });
     }

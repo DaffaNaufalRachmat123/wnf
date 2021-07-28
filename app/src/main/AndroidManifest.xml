@@ -23,5 +23,6 @@
         <activity android:name=".ActivityParentMateri" android:theme="@style/AppTheme.NoActionBar"/>
         <activity android:name=".ActivityQuiz" android:theme="@style/AppTheme.NoActionBar"/>
         <activity android:name=".ActivityQuizDetail" android:theme="@style/AppTheme.NoActionBar"/>
+        <activity android:name=".ActivityAbout" android:theme="@style/AppTheme.NoActionBar"/>
     </application>
 </manifest>

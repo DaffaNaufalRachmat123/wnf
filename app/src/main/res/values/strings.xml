@@ -9,4 +9,6 @@
     <string name="example">\textbf{Perkalian merupakan penjumlahan secara\\ berulang-ulang. Contoh : }
 \\\textbf{Berlaku : }
 \\\quad\quad\bullet \textbf{a x b}</string>
+    <string name="about_text">
+    </string>
 </resources>
