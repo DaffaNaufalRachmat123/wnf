@@ -25,5 +25,6 @@
         <activity android:name=".ActivityQuizDetail" android:theme="@style/AppTheme.NoActionBar"/>
         <activity android:name=".ActivityAbout" android:theme="@style/AppTheme.NoActionBar"/>
         <activity android:name=".ActivitySubMateri" android:theme="@style/AppTheme.NoActionBar"/>
+        <activity android:name=".ActivityMusic" android:theme="@style/AppTheme.NoActionBar"/>
     </application>
 </manifest>

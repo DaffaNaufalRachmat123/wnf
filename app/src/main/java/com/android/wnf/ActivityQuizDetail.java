@@ -3,10 +3,8 @@ package com.android.wnf;
 import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.SeekBar;
@@ -15,175 +13,167 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatTextView;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.exoplayer2.MediaItem;
-import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.source.ProgressiveMediaSource;
-import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.DataSpec;
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
-import com.google.android.exoplayer2.upstream.RawResourceDataSource;
-import com.google.android.exoplayer2.util.Util;
+import com.android.wnf.adapter.AnswerAdapter;
+import com.android.wnf.custom_widget.TeXView;
+import com.android.wnf.model.Quiz;
 
-import java.io.IOException;
-import java.util.Timer;
-import java.util.TimerTask;
-
-public class ActivityQuizDetail extends AppCompatActivity implements Player.EventListener {
-    private AppCompatTextView questionText , minuteText;
-    private ImageView icStateSound , icSound;
+public class ActivityQuizDetail extends AppCompatActivity {
+    private ImageView icStateSound;
+    private TeXView questionText;
     private SeekBar seekBar;
+    private MediaPlayer player;
     private boolean isPlaying = false;
-    private int currentVolume = 0;
-    private Handler mHandler = new Handler();
-    private SimpleExoPlayer exoPlayer;
-    private boolean dragging = false;
-    private void updateProgressBar() {
-        long duration = exoPlayer == null ? 0 : exoPlayer.getDuration();
-        long position = exoPlayer == null ? 0 : exoPlayer.getCurrentPosition();
-        if (!dragging) {
-            //seekBar.setProgress(progressBarValue(position));
-        }
-        long bufferedPosition = exoPlayer == null ? 0 : exoPlayer.getBufferedPosition();
-        //seekBar.setSecondaryProgress(progressBarValue(bufferedPosition));
-        // Remove scheduled updates.
-        mHandler.removeCallbacks(updateProgressAction);
-        // Schedule an update if necessary.
-        int playbackState = exoPlayer == null ? Player.STATE_IDLE : exoPlayer.getPlaybackState();
-        if (playbackState != Player.STATE_IDLE && playbackState != Player.STATE_ENDED) {
-            long delayMs;
-            if (exoPlayer.getPlayWhenReady() && playbackState == Player.STATE_READY) {
-                delayMs = 1000 - (position % 1000);
-                if (delayMs < 200) {
-                    delayMs += 1000;
-                }
-            } else {
-                delayMs = 1000;
-            }
-            mHandler.postDelayed(updateProgressAction, delayMs);
-        }
-    }
-
-    private final Runnable updateProgressAction = new Runnable() {
-        @Override
-        public void run() {
-            updateProgressBar();
-        }
-    };
+    private Handler handler = new Handler();
+    private Quiz quiz = null;
+    private RecyclerView recyclerViewAnswer;
+    private AnswerAdapter mAdapter;
+    private int lastCheckedPosition = -1;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quiz_detail);
-        initView();
-        initializePlayer();
-        setSeekBar();
-        icStateSound.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                play();
-            }
-        });
+        quiz = getIntent().getParcelableExtra("quiz");
+        icStateSound = findViewById(R.id.icStateSound);
+        seekBar = findViewById(R.id.seekBar);
+        questionText = findViewById(R.id.questionText);
+
+        if(quiz != null){
+            initializeQuestion();
+            initializePlayer();
+            initSeekBar();
+            initializeAnswer();
+            icStateSound.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    playSound();
+                }
+            });
+        } else {
+            seekBar.setEnabled(false);
+            icStateSound.setEnabled(false);
+        }
     }
 
+    private void initializeQuestion(){
+        questionText.setLaTeX(quiz.getQuestion());
+    }
+
+    private void initializeAnswer(){
+        recyclerViewAnswer = findViewById(R.id.recyclerViewAnswer);
+        recyclerViewAnswer.setHasFixedSize(true);
+        recyclerViewAnswer.setItemAnimator(new DefaultItemAnimator());
+        recyclerViewAnswer.setLayoutManager(new LinearLayoutManager(this , RecyclerView.VERTICAL , false));
+        mAdapter = new AnswerAdapter(quiz.getAnswerList());
+        mAdapter.setAnswerListener(new AnswerAdapter.AnswerListener() {
+            @Override
+            public void onChoose(int position) {
+                if(lastCheckedPosition != -1){
+                    quiz.getAnswerList().get(lastCheckedPosition).setChecked(false);
+                    mAdapter.notifyItemChanged(lastCheckedPosition);
+                }
+                lastCheckedPosition = position;
+                quiz.getAnswerList().get(lastCheckedPosition).setChecked(true);
+                mAdapter.notifyItemChanged(lastCheckedPosition);
+            }
+        });
+        recyclerViewAnswer.setAdapter(mAdapter);
+    }
+
+    private void playSound(){
+        if(isPlaying){
+            handler.removeCallbacksAndMessages(null);
+            isPlaying = false;
+            player.pause();
+            icStateSound.setImageResource(R.drawable.ic_play);
+        } else {
+            updateSeekBar();
+            isPlaying = true;
+            player.start();
+            icStateSound.setImageResource(R.drawable.ic_pause);
+        }
+    }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(exoPlayer != null){
-            exoPlayer.stop(true);
-            exoPlayer.release();
-            exoPlayer = null;
+        if(player != null){
+            player.stop();
+            player = null;
         }
-        resetVolume();
+        handler.removeCallbacksAndMessages(null);
     }
 
     private void initializePlayer(){
-        exoPlayer = new SimpleExoPlayer.Builder(this).build();
-        exoPlayer.addListener(this);
-        if(getMediaSourceFromRaw() != null){
-            exoPlayer.setMediaSource(getMediaSourceFromRaw());
-            exoPlayer.prepare();
-            Toast.makeText(ActivityQuizDetail.this , String.valueOf(exoPlayer.getDuration()) , Toast.LENGTH_LONG).show();
+        if(quiz != null){
+            player = MediaPlayer.create(this , quiz.getSoundResource());
+            player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    if(isPlaying){
+                        if(player != null){
+                            player.seekTo(0);
+                            isPlaying = false;
+                            player.stop();
+                            player.release();
+                            player = null;
+                            initializePlayer();
+                            seekBar.setProgress(0);
+                            icStateSound.setImageResource(R.drawable.ic_play);
+                            handler.removeCallbacksAndMessages(null);
+                        }
+                    }
+                }
+            });
         }
     }
-    private MediaSource getMediaSourceFromRaw(){
-        RawResourceDataSource rawSource = new RawResourceDataSource(this);
-        try {
-            rawSource.open(new DataSpec(RawResourceDataSource.buildRawResourceUri(R.raw.boruto_opening)));
-            DefaultDataSourceFactory dataSource = new DefaultDataSourceFactory(this , Util.getUserAgent(this , "ExoAudio"));
-            MediaItem mediaItem = MediaItem.fromUri(rawSource.getUri());
-            return new ProgressiveMediaSource.Factory(dataSource).createMediaSource(mediaItem);
-        } catch (RawResourceDataSource.RawResourceDataSourceException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-    private void setSeekBar(){
+    private void initSeekBar(){
+        if(player != null)
+            seekBar.setMax(player.getDuration());
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if(exoPlayer != null){
-                    exoPlayer.seekTo(progress);;
-                }
+
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                if(exoPlayer != null){
-                    exoPlayer.pause();
+                if(isPlaying){
+                    isPlaying = false;
+                    if(player != null){
+                        player.pause();
+                        player.seekTo(seekBar.getProgress());
+                    }
                     icStateSound.setImageResource(R.drawable.ic_play);
+                } else {
+                    player.seekTo(seekBar.getProgress());
                 }
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                if(exoPlayer != null){
-                    exoPlayer.setPlayWhenReady(true);
-                    exoPlayer.seekTo(exoPlayer.getCurrentPosition());
+                if(!isPlaying){
+                    if(player != null){
+                        player.seekTo(seekBar.getProgress());
+                        playSound();
+                    }
                     icStateSound.setImageResource(R.drawable.ic_pause);
                 }
             }
         });
     }
-    private void play(){
-        if(!isPlaying){
-            if(exoPlayer != null){
-                maxVolume();
-                exoPlayer.setPlayWhenReady(true);
-                isPlaying = true;
-                icStateSound.setImageResource(R.drawable.ic_pause);
+    private void updateSeekBar(){
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if(player != null){
+                    seekBar.setProgress(player.getCurrentPosition());
+                    handler.postDelayed(this , 1000);
+                }
             }
-        } else {
-            if(exoPlayer != null){
-                resetVolume();
-                exoPlayer.pause();
-                isPlaying = false;
-                icStateSound.setImageResource(R.drawable.ic_play);
-            }
-        }
-    }
-
-    @Override
-    public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-        updateProgressBar();
-    }
-
-    private void maxVolume(){
-        AudioManager manager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-        currentVolume = manager.getStreamVolume(AudioManager.STREAM_MUSIC);
-        manager.setStreamVolume(AudioManager.STREAM_MUSIC , manager.getStreamMaxVolume(AudioManager.STREAM_MUSIC) , 0);
-    }
-    private void resetVolume(){
-        AudioManager manager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-        manager.setStreamVolume(AudioManager.STREAM_MUSIC , currentVolume , 0);
-    }
-    private void initView(){
-        questionText = findViewById(R.id.questionText);
-        minuteText = findViewById(R.id.minuteText);
-        icStateSound = findViewById(R.id.icStateSound);
-        icSound = findViewById(R.id.icSound);
-        seekBar = findViewById(R.id.seekBar);
+        } , 0);
     }
 }
