@@ -15,4 +15,8 @@
     <color name="yellow_1">#fdd835</color>
     <color name="yellow_2">#ff8f00</color>
     <color name="gray_1">#8F9799</color>
+    <color name="green_1">#66bb6a</color>
+    <color name="green_2">#c5e1a5</color>
+    <color name="red_1">#ef5350</color>
+    <color name="red_2">#ef9a9a</color>
 </resources>

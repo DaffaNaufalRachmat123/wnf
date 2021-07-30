@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
@@ -25,6 +26,7 @@ public class ActivityQuizDetail extends AppCompatActivity {
     private ImageView icStateSound;
     private TeXView questionText;
     private SeekBar seekBar;
+    private LinearLayout editLayout;
     private MediaPlayer player;
     private boolean isPlaying = false;
     private Handler handler = new Handler();
@@ -40,6 +42,14 @@ public class ActivityQuizDetail extends AppCompatActivity {
         icStateSound = findViewById(R.id.icStateSound);
         seekBar = findViewById(R.id.seekBar);
         questionText = findViewById(R.id.questionText);
+        editLayout = findViewById(R.id.editLayout);
+
+        editLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
 
         if(quiz != null){
             initializeQuestion();
