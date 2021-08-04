@@ -16,15 +16,17 @@
         android:id="@+id/parentContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_incorrect">
+        android:background="@drawable/bg_unselected">
         <ImageView
             android:id="@+id/icState"
             android:layout_width="35dp"
             android:layout_height="35dp"
-            app:srcCompat="@drawable/ic_dot_incorrect"
+            app:srcCompat="@drawable/ic_dot_unselected"
             android:padding="6.5dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="15dp"
             android:layout_marginStart="20dp"
-            android:background="@drawable/bg_dot_incorrect"
+            android:background="@drawable/bg_dot_unselected"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>

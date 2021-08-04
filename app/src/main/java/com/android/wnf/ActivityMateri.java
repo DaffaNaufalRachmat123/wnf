@@ -2,6 +2,7 @@ package com.android.wnf;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -14,6 +15,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.wnf.adapter.MateriAdapter;
 import com.android.wnf.model.Materi;
+import com.android.wnf.model.Materis;
+import com.android.wnf.model.ParentMateri;
+import com.android.wnf.model.ParentMateris;
+import com.android.wnf.model.SubMateri;
+import com.android.wnf.model.SubMateris;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,24 +28,19 @@ public class ActivityMateri extends AppCompatActivity {
     private AppCompatTextView titleText;
     private RecyclerView recyclerViewMateri;
     private ImageView icHome;
-    private String titleMateri;
     private MateriAdapter materiAdapter;
+    private ParentMateris parentMateri;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_materi);
-        titleMateri = getIntent().getStringExtra("title_materi");
-
+        parentMateri = getIntent().getParcelableExtra("parent_materi");
         titleText = findViewById(R.id.titleText);
         recyclerViewMateri = findViewById(R.id.recyclerViewMateri);
         icHome = findViewById(R.id.icHome);
 
-        titleText.setText(titleMateri);
-        if(titleMateri.equalsIgnoreCase(getString(R.string.materi_bilangan_bulat)))
-            setupMateriAdapter(getResources().getStringArray(R.array.bilangan_bulat));
-        else if(titleMateri.equalsIgnoreCase(getString(R.string.materi_bilangan_pecahan)))
-            setupMateriAdapter(getResources().getStringArray(R.array.bilangan_pecahan));
-
+        titleText.setText(parentMateri.getTitle());
+        setupMateriAdapter(parentMateri.getMaterisList());
         icHome.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -47,15 +48,21 @@ public class ActivityMateri extends AppCompatActivity {
             }
         });
     }
-    private void setupMateriAdapter(String[] stringArray){
-        List<Materi> materiList = new ArrayList<>();
-        for(int i = 0; i < stringArray.length; i++)
-            materiList.add(new Materi(i , stringArray[i]));
+    private void setupMateriAdapter(List<Materis> materiList){
         materiAdapter = new MateriAdapter(this , materiList);
         materiAdapter.setMateriClickListener(new MateriAdapter.MateriClickListener() {
             @Override
             public void onClick(int position) {
-                startActivity(new Intent(getApplicationContext() , ActivitySubMateri.class));
+                Intent intent;
+                if(parentMateri.getMaterisList().get(position).getIsSubMateri() == 1) {
+                    intent = new Intent(getApplicationContext(), ActivitySubMateri.class);
+                    intent.putExtra("materi", parentMateri.getMaterisList().get(position));
+                } else {
+                    intent = new Intent(getApplicationContext(), ActivityParentMateri.class);
+                    intent.putExtra("is_sub_materi" , false);
+                    intent.putParcelableArrayListExtra("sub_materi_list" , (ArrayList<SubMateris>)parentMateri.getMaterisList().get(position).getSubMaterisList());
+                }
+                startActivity(intent);
             }
         });
         recyclerViewMateri.setHasFixedSize(true);

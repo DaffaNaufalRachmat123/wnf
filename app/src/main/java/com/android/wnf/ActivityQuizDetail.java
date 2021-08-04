@@ -1,189 +1,528 @@
 package com.android.wnf;
 
-import android.content.Context;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
+import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
+import android.os.Parcelable;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.SeekBar;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatTextView;
-import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.ViewPager;
 
-import com.android.wnf.adapter.AnswerAdapter;
-import com.android.wnf.custom_widget.TeXView;
+import com.android.wnf.adapter.QuestionAdapter;
+import com.android.wnf.custom_widget.NonSwipeableViewPager;
+import com.android.wnf.model.Answer;
+import com.android.wnf.model.ParentQuiz;
 import com.android.wnf.model.Quiz;
+import com.android.wnf.model.QuizResult;
+
+import net.cachapa.expandablelayout.ExpandableLayout;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ActivityQuizDetail extends AppCompatActivity {
-    private ImageView icStateSound;
-    private TeXView questionText;
-    private SeekBar seekBar;
-    private LinearLayout editLayout;
-    private MediaPlayer player;
-    private boolean isPlaying = false;
-    private Handler handler = new Handler();
-    private Quiz quiz = null;
-    private RecyclerView recyclerViewAnswer;
-    private AnswerAdapter mAdapter;
-    private int lastCheckedPosition = -1;
+    private ConstraintLayout bgSubmit , badgePageText;
+    private NonSwipeableViewPager viewPager;
+    private ViewPager viewPagerReview;
+    private CardView btnSubmit , btnPrev , btnNext;
+    private AppCompatTextView submitText , cardTitleText , badgeText;
+    private ParentQuiz parentQuiz;
+    private ImageView icMenu , icCloseBlue;
+    private int model_position = 0;
+    private int lastChoosePosition = 0;
+    private boolean isReviewQuiz = false;
+    private List<QuizResult> resultsQuiz = new ArrayList<>();
+    private List<Quiz> quizListReview = new ArrayList<>();
+    private QuizPagerAdapter adapter;
+    private ExpandableLayout expandableNav;
+    private RecyclerView recyclerViewNav;
+    private boolean isExpanded = false;
+    private boolean isResultAdded = false;
+    private int quizPosition = 0;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quiz_detail);
-        quiz = getIntent().getParcelableExtra("quiz");
-        icStateSound = findViewById(R.id.icStateSound);
-        seekBar = findViewById(R.id.seekBar);
-        questionText = findViewById(R.id.questionText);
-        editLayout = findViewById(R.id.editLayout);
+        isReviewQuiz = getIntent().getBooleanExtra("is_review" , false);
+        quizPosition = getIntent().getIntExtra("quiz_position" , 0);
+        viewPager = findViewById(R.id.viewPagerQuestion);
+        viewPagerReview = findViewById(R.id.viewPagerReview);
+        icCloseBlue = findViewById(R.id.icCloseBlue);
+        icMenu = findViewById(R.id.icMenu);
+        expandableNav = findViewById(R.id.expandableNav);
+        recyclerViewNav = findViewById(R.id.recyclerViewNav);
+        btnSubmit = findViewById(R.id.btnSubmit);
+        bgSubmit = findViewById(R.id.bgSubmit);
+        btnPrev = findViewById(R.id.btnPrev);
+        btnNext = findViewById(R.id.btnNext);
+        submitText = findViewById(R.id.submitText);
+        cardTitleText = findViewById(R.id.cardTitleText);
+        badgePageText = findViewById(R.id.badgePageText);
+        badgeText = findViewById(R.id.badgeText);
 
-        editLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
-
-        if(quiz != null){
-            initializeQuestion();
-            initializePlayer();
-            initSeekBar();
-            initializeAnswer();
-            icStateSound.setOnClickListener(new View.OnClickListener() {
+        if(!isReviewQuiz){
+            parentQuiz = getIntent().getParcelableExtra("parent_quiz");
+            EventBus.getDefault().register(this);
+            initializeQuizList();
+            initializeNavigation();
+            cardTitleText.setText(getResources().getString(R.string.title_quiz , "1" , String.valueOf(parentQuiz.getQuizList().size())));
+            viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
                 @Override
-                public void onClick(View v) {
-                    playSound();
+                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+                }
+
+                @Override
+                public void onPageSelected(int position) {
+                    Log.d("page_pos" , String.valueOf(position));
+                    Log.d("page_size" , String.valueOf(parentQuiz.getQuizList().size()));
+                    if(position <= parentQuiz.getQuizList().size() - 1){
+                        Log.d("quizChange" , "sini daf");
+                        btnSubmit.setVisibility(View.VISIBLE);
+                        btnPrev.setVisibility(View.GONE);
+                        btnNext.setVisibility(View.GONE);
+                        int totalPage = 0;
+                        if(isResultAdded)
+                            totalPage = parentQuiz.getQuizList().size() - 1;
+                        else
+                            totalPage = parentQuiz.getQuizList().size();
+                        cardTitleText.setText(getResources().getString(R.string.title_quiz , String.valueOf(position + 1) , String.valueOf(totalPage)));
+                        model_position = position;
+                        boolean isCheckedOne = false;
+                        for(int i = 0; i < parentQuiz.getQuizList().get(model_position).getAnswerList().size(); i++){
+                            if(parentQuiz.getQuizList().get(model_position).getAnswerList().get(i).isChecked() == 1){
+                                isCheckedOne = true;
+                                break;
+                            }
+                        }
+                        if(isCheckedOne){
+                            initializeBtnNext();
+                        } else {
+                            initializeBtnSubmit();
+                        }
+                    }
+
+                    if(parentQuiz.getQuizList().get(position).getId() == -999){
+                        cardTitleText.setText("Quiz Result");
+                        btnSubmit.setVisibility(View.GONE);
+                        btnPrev.setVisibility(View.VISIBLE);
+                        btnNext.setVisibility(View.VISIBLE);
+                        btnPrev.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                viewPager.setCurrentItem(viewPager.getCurrentItem() - 1);
+                                Log.d("prev_pos" , String.valueOf(viewPager.getCurrentItem()));
+                            }
+                        });
+                        btnNext.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                boolean isOtherQuiz = false;
+                                if(quizPosition + 1 < new QuizData().getParentQuizList().size())
+                                    isOtherQuiz = true;
+                                startActivity(new Intent(getApplicationContext() , ActivityQuizPage.class)
+                                .putExtra("is_another_quiz" , isOtherQuiz)
+                                .putExtra("number_quiz" , quizPosition + 1));
+                            }
+                        });
+                    }
+                }
+
+                @Override
+                public void onPageScrollStateChanged(int state) {
+
                 }
             });
-        } else {
-            seekBar.setEnabled(false);
-            icStateSound.setEnabled(false);
-        }
-    }
-
-    private void initializeQuestion(){
-        questionText.setLaTeX(quiz.getQuestion());
-    }
-
-    private void initializeAnswer(){
-        recyclerViewAnswer = findViewById(R.id.recyclerViewAnswer);
-        recyclerViewAnswer.setHasFixedSize(true);
-        recyclerViewAnswer.setItemAnimator(new DefaultItemAnimator());
-        recyclerViewAnswer.setLayoutManager(new LinearLayoutManager(this , RecyclerView.VERTICAL , false));
-        mAdapter = new AnswerAdapter(quiz.getAnswerList());
-        mAdapter.setAnswerListener(new AnswerAdapter.AnswerListener() {
-            @Override
-            public void onChoose(int position) {
-                if(lastCheckedPosition != -1){
-                    quiz.getAnswerList().get(lastCheckedPosition).setChecked(false);
-                    mAdapter.notifyItemChanged(lastCheckedPosition);
+            icMenu.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(isExpanded){
+                        isExpanded = false;
+                        icMenu.setImageResource(R.drawable.ic_menu_blue);
+                        expandableNav.collapse();
+                    } else {
+                        isExpanded = true;
+                        icMenu.setImageResource(R.drawable.ic_close_blue);
+                        expandableNav.expand();
+                    }
                 }
-                lastCheckedPosition = position;
-                quiz.getAnswerList().get(lastCheckedPosition).setChecked(true);
-                mAdapter.notifyItemChanged(lastCheckedPosition);
+            });
+            if(parentQuiz.getQuizList().size() == 0){
+                bgSubmit.setVisibility(View.GONE);
+            } else if(parentQuiz.getQuizList().size() > 0) {
+                model_position = 0;
+                bgSubmit.setVisibility(View.VISIBLE);
             }
-        });
-        recyclerViewAnswer.setAdapter(mAdapter);
-    }
-
-    private void playSound(){
-        if(isPlaying){
-            handler.removeCallbacksAndMessages(null);
-            isPlaying = false;
-            player.pause();
-            icStateSound.setImageResource(R.drawable.ic_play);
+            initializeBtnSubmit();
         } else {
-            updateSeekBar();
-            isPlaying = true;
-            player.start();
-            icStateSound.setImageResource(R.drawable.ic_pause);
+            quizListReview = getIntent().getParcelableArrayListExtra("quiz_list_review");
+            icCloseBlue.setVisibility(View.VISIBLE);
+            viewPager.setVisibility(View.GONE);
+            viewPagerReview.setVisibility(View.VISIBLE);
+            badgePageText.setVisibility(View.VISIBLE);
+            btnSubmit.setVisibility(View.GONE);
+            btnPrev.setVisibility(View.VISIBLE);
+            btnNext.setVisibility(View.VISIBLE);
+            List<Quiz> quizLists = new ArrayList<>();
+            for(Quiz quiz : quizListReview){
+                if(quiz.getId() != -999){
+                    quizLists.add(quiz);
+                }
+            }
+            quizListReview = quizLists;
+            initializeNavigation();
+            initializeQuizReviewList();
+            cardTitleText.setText(getResources().getString(R.string.title_quiz , "1" , String.valueOf(quizListReview.size())));
+            boolean isTrue = false;
+            Quiz quiz = quizListReview.get(0);
+            for(Answer answer : quiz.getAnswerList()){
+                if(answer.isChecked() == 1 && answer.isCorrect() == 1){
+                    isTrue = true;
+                    break;
+                }
+            }
+            if(isTrue){
+                badgePageText.setBackground(ContextCompat.getDrawable(ActivityQuizDetail.this , R.drawable.bg_badge_true));
+                badgeText.setText(getString(R.string.badge_text , "1" , String.valueOf(quizListReview.size()) , getString(R.string.correct_badge)));
+            } else {
+                badgePageText.setBackground(ContextCompat.getDrawable(ActivityQuizDetail.this , R.drawable.bg_badge_false));
+                badgeText.setText(getString(R.string.badge_text , "1" , String.valueOf(quizListReview.size()) , getString(R.string.incorrect_badge)));
+            }
+            viewPagerReview.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                @Override
+                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+                }
+
+                @Override
+                public void onPageSelected(int position) {
+                    cardTitleText.setText(getResources().getString(R.string.title_quiz , String.valueOf(position + 1) , String.valueOf(quizListReview.size())));
+                    if(position == 0){
+                        btnPrev.setCardBackgroundColor(getResources().getColor(R.color.blue_1));
+                        btnPrev.setEnabled(false);
+                    } else {
+                        if(position > 0 && position < quizListReview.size() - 1){
+                            btnPrev.setCardBackgroundColor(getResources().getColor(R.color.blue_5));
+                            btnPrev.setEnabled(true);
+                            btnNext.setCardBackgroundColor(getResources().getColor(R.color.blue_5));
+                            btnNext.setEnabled(true);
+                        } else {
+                            btnNext.setCardBackgroundColor(getResources().getColor(R.color.blue_1));
+                            btnNext.setEnabled(false);
+                        }
+                    }
+                    Quiz quiz = quizListReview.get(position);
+                    boolean isCorrect = false;
+                    for(int i = 0; i < quiz.getAnswerList().size(); i++){
+                        if(quiz.getAnswerList().get(i).isChecked() == 1 && quiz.getAnswerList().get(i).isCorrect() == 1){
+                            isCorrect = true;
+                            break;
+                        }
+                    }
+                    if(isCorrect){
+                        badgePageText.setBackground(ContextCompat.getDrawable(ActivityQuizDetail.this , R.drawable.bg_badge_true));
+                        badgeText.setText(getString(R.string.badge_text , String.valueOf(position + 1) , String.valueOf(quizListReview.size()) , getString(R.string.correct_badge)));
+                    } else {
+                        badgePageText.setBackground(ContextCompat.getDrawable(ActivityQuizDetail.this , R.drawable.bg_badge_false));
+                        badgeText.setText(getString(R.string.badge_text , String.valueOf(position + 1) , String.valueOf(quizListReview.size()) , getString(R.string.incorrect_badge)));
+                    }
+                }
+
+                @Override
+                public void onPageScrollStateChanged(int state) {
+
+                }
+            });
+            icCloseBlue.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    finish();
+                }
+            });
+            icMenu.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(isExpanded){
+                        isExpanded = false;
+                        icMenu.setImageResource(R.drawable.ic_menu_blue);
+                        expandableNav.collapse();
+                    } else {
+                        isExpanded = true;
+                        icMenu.setImageResource(R.drawable.ic_close_blue);
+                        expandableNav.expand();
+                    }
+                }
+            });
+            btnPrev.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(viewPagerReview.getCurrentItem() > 0){
+                        viewPagerReview.setCurrentItem(viewPagerReview.getCurrentItem() - 1);
+                    }
+                }
+            });
+            btnNext.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(viewPagerReview.getCurrentItem() < quizListReview.size() - 1){
+                        viewPagerReview.setCurrentItem(viewPagerReview.getCurrentItem() + 1);
+                    }
+                }
+            });
         }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(player != null){
-            player.stop();
-            player = null;
-        }
-        handler.removeCallbacksAndMessages(null);
+        EventBus.getDefault().unregister(this);
     }
 
-    private void initializePlayer(){
-        if(quiz != null){
-            player = MediaPlayer.create(this , quiz.getSoundResource());
-            player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mp) {
-                    if(isPlaying){
-                        if(player != null){
-                            player.seekTo(0);
-                            isPlaying = false;
-                            player.stop();
-                            player.release();
-                            player = null;
-                            initializePlayer();
-                            seekBar.setProgress(0);
-                            icStateSound.setImageResource(R.drawable.ic_play);
-                            handler.removeCallbacksAndMessages(null);
-                        }
+    private void addQuizResultPage(){
+        if(!isResultAdded){
+            int score_points = 0;
+            for(int i = 0; i < parentQuiz.getQuizList().size(); i++){
+                Quiz quiz = parentQuiz.getQuizList().get(i);
+                for(int j = 0; j < quiz.getAnswerList().size(); j++){
+                    Answer answer = quiz.getAnswerList().get(j);
+                    if(answer.isChecked() == 1 && answer.isCorrect() == 1){
+                        score_points += 1;
                     }
                 }
-            });
+            }
+            score_points = score_points * 20;
+            int isSuccess = 0;
+            if(score_points < 80)
+                isSuccess = 0;
+            else
+                isSuccess = 1;
+            Quiz result = new Quiz(-999 , "" , 0 , new ArrayList<>() , score_points , isSuccess , 0);
+            parentQuiz.getQuizList().add(result);
+            adapter.notifyDataSetChanged();
+            if(!isReviewQuiz){
+                viewPager.setCurrentItem(viewPager.getCurrentItem() + 1);
+                isResultAdded = true;
+            }
         }
     }
-    private void initSeekBar(){
-        if(player != null)
-            seekBar.setMax(player.getDuration());
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 
-            }
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(WrapperPosition data){
+        Log.d("passed_positions" , String.format("%s AND %s" , String.valueOf(data.model_position) , String.valueOf(data.lastChoosePosition)));
+        parentQuiz.getQuizList().get(data.model_position).setAnswerList(data.answerList);
+        List<Answer> answerList = parentQuiz.getQuizList().get(data.model_position).getAnswerList();
+        this.model_position = data.model_position;
+        this.lastChoosePosition = data.lastChoosePosition;
+    }
 
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                if(isPlaying){
-                    isPlaying = false;
-                    if(player != null){
-                        player.pause();
-                        player.seekTo(seekBar.getProgress());
-                    }
-                    icStateSound.setImageResource(R.drawable.ic_play);
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(WrapperCallback data){
+        List<Answer> answerList = data.answerList;
+        parentQuiz.getQuizList().get(data.model_position).setAnswerList(answerList);
+        parentQuiz.getQuizList().get(data.model_position).setAnswer(1);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(WrapperReview review){
+        Intent intent = new Intent(this , ActivityQuizDetail.class);
+        intent.putExtra("is_review" , true);
+        intent.putParcelableArrayListExtra("quiz_list_review" , (ArrayList<Quiz>)parentQuiz.getQuizList());
+        startActivity(intent);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(WrapperReset data){
+        if(!isReviewQuiz){
+            for(int i = 0; i < parentQuiz.getQuizList().size(); i++){
+                if(parentQuiz.getQuizList().get(i).getId() == -999){
+                    parentQuiz.getQuizList().remove(i);
                 } else {
-                    player.seekTo(seekBar.getProgress());
-                }
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                if(!isPlaying){
-                    if(player != null){
-                        player.seekTo(seekBar.getProgress());
-                        playSound();
+                    for(int j = 0; j < parentQuiz.getQuizList().get(i).getAnswerList().size(); j++){
+                        parentQuiz.getQuizList().get(i).getAnswerList().get(j).setClickable(1);
+                        parentQuiz.getQuizList().get(i).getAnswerList().get(j).setChecked(0);
+                        parentQuiz.getQuizList().get(i).getAnswerList().get(j).setResult(-1);
                     }
-                    icStateSound.setImageResource(R.drawable.ic_pause);
+                }
+                parentQuiz.getQuizList().get(i).setAnswer(0);
+            }
+            isResultAdded = false;
+            cardTitleText.setText(getString(R.string.title_quiz , "1" , String.valueOf(parentQuiz.getQuizList().size())));
+            btnPrev.setVisibility(View.GONE);
+            btnNext.setVisibility(View.GONE);
+            btnSubmit.setVisibility(View.VISIBLE);
+            initializeBtnSubmit();
+            initializeQuizList();
+            if(parentQuiz.getQuizList().size() > 0)
+                viewPager.setCurrentItem(0);
+        }
+    }
+
+    static class WrapperPosition {
+        int model_position;
+        int lastChoosePosition;
+        List<Answer> answerList;
+        WrapperPosition(int model_position , int lastChoosePosition , List<Answer> answerList){
+            this.model_position = model_position;
+            this.lastChoosePosition = lastChoosePosition;
+            this.answerList = answerList;
+        }
+    }
+
+    static class WrapperCallback {
+        int model_position;
+        List<Answer> answerList;
+        WrapperCallback(int model_position , List<Answer> answerList){
+            this.model_position = model_position;
+            this.answerList = answerList;
+        }
+    }
+
+    static class WrapperReview {}
+    static class WrapperReset {}
+
+    private void initializeBtnSubmit(){
+        submitText.setText("SUBMIT");
+        btnSubmit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(lastChoosePosition != -1){
+                    EventBus.getDefault().post(new FragmentQuiz.TriggerChange(model_position , lastChoosePosition));
+                    initializeBtnNext();
                 }
             }
         });
     }
-    private void updateSeekBar(){
-        handler.postDelayed(new Runnable() {
+
+    private void initializeBtnNext(){
+        submitText.setText("NEXT");
+        btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void run() {
-                if(player != null){
-                    seekBar.setProgress(player.getCurrentPosition());
-                    handler.postDelayed(this , 1000);
+            public void onClick(View v) {
+                int count = viewPager.getCurrentItem();
+                if(count < parentQuiz.getQuizList().size() - 1){
+                    model_position = count + 1;
+                    lastChoosePosition = -1;
+                    viewPager.setCurrentItem(count + 1);
+                } else {
+                    boolean atleast_one = false;
+                    for(Quiz quiz : parentQuiz.getQuizList()){
+                        if(quiz.getIsAnswer() != 1){
+                            atleast_one = true;
+                        }
+                    }
+                    if(atleast_one){
+                        Toast.makeText(getApplicationContext() , "Harap isi semua soal" , Toast.LENGTH_SHORT).show();
+                    } else {
+                        addQuizResultPage();
+                    }
                 }
             }
-        } , 0);
+        });
+    }
+
+    private void initializeQuizList(){
+        cardTitleText.setText(getResources().getString(R.string.title_quiz , "1" , String.valueOf(parentQuiz.getQuizList().size())));
+        adapter = new QuizPagerAdapter(getSupportFragmentManager() , parentQuiz.getQuizList());
+        viewPager.setAdapter(adapter);
+    }
+    private void initializeQuizReviewList(){
+        cardTitleText.setText(getResources().getString(R.string.title_quiz , "1" , String.valueOf(quizListReview.size())));
+        QuizPagerReview reviewAdapter = new QuizPagerReview(getSupportFragmentManager() , quizListReview);
+        viewPagerReview.setAdapter(reviewAdapter);
+    }
+    private void initializeNavigation(){
+        recyclerViewNav.setHasFixedSize(true);
+        recyclerViewNav.setItemAnimator(null);
+        recyclerViewNav.setLayoutManager(new LinearLayoutManager(this , RecyclerView.VERTICAL , false));
+        List<Quiz> quizNavList = new ArrayList<>();
+        if(!isReviewQuiz){
+            for(Quiz quiz : parentQuiz.getQuizList()){
+                if(quiz.getId() != -999)
+                    quizNavList.add(quiz);
+            }
+        } else {
+            quizNavList = quizListReview;
+        }
+        QuestionAdapter adapter = new QuestionAdapter(this, quizNavList, new QuestionAdapter.QuestionListener() {
+            @Override
+            public void onClick(int position) {
+                if(!isReviewQuiz){
+                    viewPager.setCurrentItem(position);
+                    model_position = position;
+                    lastChoosePosition = -1;
+                } else {
+                    viewPagerReview.setCurrentItem(position);
+                }
+                if(isExpanded){
+                    isExpanded = false;
+                    icMenu.setImageResource(R.drawable.ic_menu_blue);
+                    expandableNav.collapse();
+                }
+                Log.d("positions" , String.valueOf(position));
+            }
+        });
+        recyclerViewNav.setAdapter(adapter);
+    }
+    class QuizPagerAdapter extends FragmentStatePagerAdapter {
+        private List<Quiz> quizList = new ArrayList<>();
+        public QuizPagerAdapter(FragmentManager manager , List<Quiz> quizList){
+            super(manager);
+            this.quizList = quizList;
+        }
+
+        @Override
+        public int getCount() {
+            return quizList.size();
+        }
+
+        @NonNull
+        @Override
+        public Fragment getItem(int position) {
+            if(quizList.get(position).getId() == - 999){
+                return FragmentQuiz.newInstance(quizList.get(position) , position , true , true);
+            } else {
+                return FragmentQuiz.newInstance(quizList.get(position) , position , false , false);
+            }
+        }
+    }
+    class QuizPagerReview extends FragmentStatePagerAdapter {
+        private List<Quiz> quizList = new ArrayList<>();
+        public QuizPagerReview(FragmentManager manager , List<Quiz> quizList){
+            super(manager);
+            this.quizList = quizList;
+        }
+
+        @Override
+        public int getCount() {
+            return quizList.size();
+        }
+
+        @NonNull
+        @Override
+        public Fragment getItem(int position) {
+            return FragmentQuiz.newInstance(quizList.get(position) , position , true , false);
+        }
     }
 }

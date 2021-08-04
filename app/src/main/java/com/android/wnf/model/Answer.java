@@ -6,29 +6,48 @@ import android.os.Parcelable;
 public class Answer implements Parcelable {
     private int id;
     private String answer;
-    private boolean isChecked;
-    public Answer(int id , String answer , boolean isChecked){
+    private int isChecked;
+    private int isCorrect;
+    private int result;
+    private int isClickable;
+    public Answer(int id , String answer , int isChecked , int isCorrect , int result , int isClickable){
         this.id = id;
         this.answer = answer;
         this.isChecked = isChecked;
+        this.isCorrect = isCorrect;
+        this.result = result;
+        this.isClickable = isClickable;
     }
     public int getId(){ return id; }
     public String getAnswer(){ return answer; }
-    public boolean isChecked(){ return isChecked; }
-    public void setChecked(boolean isChecked){
+    public int isChecked(){ return isChecked; }
+    public int isCorrect(){ return isCorrect; }
+    public int isClickable(){ return isClickable; }
+    public int getResult(){ return result; }
+    public void setClickable(int isClickable){
+        this.isClickable = isClickable;
+    }
+    public void setChecked(int isChecked){
         this.isChecked = isChecked;
     }
+    public void setResult(int result){this.result = result; }
     public Answer(Parcel in){
         id = in.readInt();
         answer = in.readString();
-        isChecked = in.readBoolean();
+        isChecked = in.readInt();
+        isCorrect = in.readInt();
+        result = in.readInt();
+        isClickable = in.readInt();
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(this.id);
         dest.writeString(this.answer);
-        dest.writeBoolean(this.isChecked);
+        dest.writeInt(this.isChecked);
+        dest.writeInt(this.isCorrect);
+        dest.writeInt(this.result);
+        dest.writeInt(this.isClickable);
     }
 
     @Override

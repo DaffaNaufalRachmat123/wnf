@@ -10,21 +10,51 @@ public class Quiz implements Parcelable {
     private String question;
     private int soundResource;
     private List<Answer> answerList;
-    public Quiz(int id , String question , int soundResource , List<Answer> answerList){
+    private int score_points = 0;
+    private int isSuccess = 0;
+    private int isAnswer = 0;
+    public Quiz(int id , String question , int soundResource , List<Answer> answerList , int score_points , int isSuccess , int isAnswer){
         this.id = id;
         this.question = question;
         this.soundResource = soundResource;
         this.answerList = answerList;
+        this.score_points = score_points;
+        this.isSuccess = isSuccess;
+        this.isAnswer = isAnswer;
     }
     public int getId(){return id; }
     public String getQuestion(){ return question; }
     public int getSoundResource(){ return soundResource; }
+    public int getScorePoints(){ return score_points; }
+    public int isSuccess(){ return isSuccess; }
+    public int getIsAnswer(){ return isAnswer; }
     public List<Answer> getAnswerList(){ return answerList; }
+    public void setAnswerList(List<Answer> answerList){
+        this.answerList = answerList;
+    }
+
+    public void setAnswer(int isAnswer){
+        this.isAnswer = isAnswer;
+    }
+
+    @Override
+    public String toString() {
+        return "Quiz{" +
+                "id=" + id +
+                ", question='" + question + '\'' +
+                ", soundResource=" + soundResource +
+                ", answerList=" + answerList +
+                '}';
+    }
+
     public Quiz(Parcel parcel){
         id = parcel.readInt();
         question = parcel.readString();
         soundResource = parcel.readInt();
         answerList = parcel.readArrayList(Answer.class.getClassLoader());
+        score_points = parcel.readInt();
+        isSuccess = parcel.readInt();
+        isAnswer = parcel.readInt();
     }
 
     @Override
@@ -33,6 +63,9 @@ public class Quiz implements Parcelable {
         dest.writeString(this.question);
         dest.writeInt(this.soundResource);
         dest.writeList(this.answerList);
+        dest.writeInt(this.score_points);
+        dest.writeInt(this.isSuccess);
+        dest.writeInt(this.isAnswer);
     }
 
     @Override

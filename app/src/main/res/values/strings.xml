@@ -11,4 +11,13 @@
 \\\quad\quad\bullet \textbf{a x b}</string>
     <string name="about_text">
     </string>
+    <string name="incorrect">Lebih Teliti lagi dan Perbanyak Latihan!!!</string>
+    <string name="correct">Hebat!!!</string>
+    <string name="result_success">Good Job!!!\nProud of You!!!</string>
+    <string name="result_failed">Try Again!!!\nGood Luck!!!</string>
+    <string name="title_quiz">Pertanyaan %s dari %s</string>
+    <string name="score_text">Your Score : %s %s</string>
+    <string name="badge_text">Question %s of %s - %s</string>
+    <string name="incorrect_badge">Incorrect</string>
+    <string name="correct_badge">Correct</string>
 </resources>

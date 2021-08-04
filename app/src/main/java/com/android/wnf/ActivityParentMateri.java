@@ -1,6 +1,7 @@
 package com.android.wnf;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -12,13 +13,17 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
-import com.android.wnf.model.Materi;
+import com.android.wnf.model.SubMateri;
+import com.android.wnf.model.SubMateriData;
+import com.android.wnf.model.SubMateris;
+import com.android.wnf.model.SubMaterisData;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ActivityParentMateri extends AppCompatActivity {
-    private List<Materi> materiList;
+    private List<SubMaterisData> subMateriDataList;
+    private List<SubMateris> subMaterisList;
+    private boolean isSubMateri = false;
     private ViewPager viewPager;
     private ImageView icBack , icHome , icNext;
     private int currentPosition = 0;
@@ -26,6 +31,7 @@ public class ActivityParentMateri extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_parent_materi);
+        isSubMateri = getIntent().getBooleanExtra("is_sub_materi" , false);
         viewPager = findViewById(R.id.viewPager);
         icBack = findViewById(R.id.icBack);
         icHome = findViewById(R.id.icHome);
@@ -51,42 +57,60 @@ public class ActivityParentMateri extends AppCompatActivity {
         icNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(currentPosition < materiList.size() - 1){
-                    currentPosition += 1;
-                    viewPager.setCurrentItem(currentPosition);
+                if(!isSubMateri){
+                    if(currentPosition < subMaterisList.size() - 1){
+                        icBack.setVisibility(View.VISIBLE);
+                        icNext.setVisibility(View.VISIBLE);
+                        currentPosition += 1;
+                        viewPager.setCurrentItem(currentPosition);
+                    } else if(currentPosition == 0) {
+                        icBack.setVisibility(View.INVISIBLE);
+                    } else if(currentPosition == subMaterisList.size()){
+                        icNext.setVisibility(View.INVISIBLE);
+                    }
+                } else {
+                    if(currentPosition < subMateriDataList.size() - 1){
+                        icBack.setVisibility(View.VISIBLE);
+                        icNext.setVisibility(View.VISIBLE);
+                        currentPosition += 1;
+                        viewPager.setCurrentItem(currentPosition);
+                    } else if(currentPosition == 0) {
+                        icBack.setVisibility(View.INVISIBLE);
+                    } else if(currentPosition == subMateriDataList.size()){
+                        icNext.setVisibility(View.INVISIBLE);
+                    }
                 }
             }
         });
 
-        initMateriList();
-        MateriPagerAdapter adapter = new MateriPagerAdapter(getSupportFragmentManager() , materiList);
+        if(!isSubMateri)
+            subMaterisList = getIntent().getParcelableArrayListExtra("sub_materi_list");
+        else
+            subMateriDataList = getIntent().getParcelableArrayListExtra("sub_materi_data_list");
+
+        MateriPagerAdapter adapter = new MateriPagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(adapter);
     }
-    private void initMateriList(){
-        materiList = new ArrayList<>();
-        materiList.add(new Materi(0 , "Perkalian" , "\\textbf{Perkalian merupakan penjumlahan secara\\\\ berulang-ulang. Contoh : }\n" +
-                "\\\\\\textbf{Berlaku : }\n" +
-                "\\\\\\quad\\quad\\bullet \\quad \\quad \\textbf{a x b}"));
-        materiList.add(new Materi(1 , "Perkalian" , getString(R.string.example)));
-        materiList.add(new Materi(2 , "Perkalian" , getString(R.string.example)));
-        materiList.add(new Materi(3 , "Perkalian" , getString(R.string.example)));
-    }
     class MateriPagerAdapter extends FragmentPagerAdapter {
-        private List<Materi> materiList = new ArrayList<>();
-        public MateriPagerAdapter(FragmentManager manager , List<Materi> materiList){
+        public MateriPagerAdapter(FragmentManager manager){
             super(manager);
-            this.materiList = materiList;
         }
 
         @Override
         public int getCount() {
-            return materiList.size();
+            if(isSubMateri)
+                return subMateriDataList.size();
+            else
+                return subMaterisList.size();
         }
 
         @NonNull
         @Override
         public Fragment getItem(int position) {
-            return FragmentMateri.newInstance(materiList.get(position).getTitleMateri() , materiList.get(position).getMateri());
+            if(!isSubMateri)
+                return FragmentMateri.newInstance(subMaterisList.get(position).getTitle() , "" , subMaterisList.get(position).getImageResource());
+            else
+                return FragmentMateri.newInstance(subMateriDataList.get(position).getTitle() , subMateriDataList.get(position).getMateri() , subMateriDataList.get(position).getImageResource());
         }
     }
 }

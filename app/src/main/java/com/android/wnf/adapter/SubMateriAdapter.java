@@ -13,14 +13,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.wnf.R;
 import com.android.wnf.model.Materi;
 import com.android.wnf.model.SubMateri;
+import com.android.wnf.model.SubMateris;
 
 import java.util.List;
 
 public class SubMateriAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    private List<SubMateri> subMateriList;
+    private List<SubMateris> subMateriList;
     private Context context;
     private MateriClickListener listener;
-    public SubMateriAdapter(Context context , List<SubMateri> subMateriList){
+    public SubMateriAdapter(Context context , List<SubMateris> subMateriList){
         this.context = context;
         this.subMateriList = subMateriList;
     }
@@ -49,8 +50,8 @@ public class SubMateriAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         SubMateriHolder holders = (SubMateriHolder) holder;
-        SubMateri materi = subMateriList.get(position);
-        holders.materiText.setText(materi.getTitleMateri());
+        SubMateris materi = subMateriList.get(position);
+        holders.materiText.setText(materi.getTitle());
         holders.parentContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

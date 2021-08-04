@@ -12,14 +12,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.wnf.R;
 import com.android.wnf.model.Materi;
+import com.android.wnf.model.Materis;
 
 import java.util.List;
 
 public class MateriAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    private List<Materi> materiList;
+    private List<Materis> materiList;
     private Context context;
     private MateriClickListener listener;
-    public MateriAdapter(Context context , List<Materi> materiList){
+    public MateriAdapter(Context context , List<Materis> materiList){
         this.context = context;
         this.materiList = materiList;
     }
@@ -48,8 +49,8 @@ public class MateriAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         MateriHolder holders = (MateriHolder) holder;
-        Materi materi = materiList.get(position);
-        holders.materiText.setText(materi.getTitleMateri());
+        Materis materi = materiList.get(position);
+        holders.materiText.setText(materi.getTitle());
         holders.parentContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

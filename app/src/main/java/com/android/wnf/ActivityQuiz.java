@@ -35,7 +35,8 @@ public class ActivityQuiz extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(getApplicationContext() , ActivityQuizDetail.class)
-                .putExtra("quiz" , quizData.getQuizList().get(0)));
+                .putExtra("parent_quiz" , quizData.getParentQuizList().get(0))
+                .putExtra("quiz_position" , 0));
             }
         });
 
@@ -43,7 +44,8 @@ public class ActivityQuiz extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(getApplicationContext() , ActivityQuizDetail.class)
-                        .putExtra("quiz" , quizData.getQuizList().get(1)));
+                        .putExtra("parent_quiz" , quizData.getParentQuizList().get(1))
+                        .putExtra("quiz_position" , 1));
             }
         });
 
@@ -51,7 +53,8 @@ public class ActivityQuiz extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(getApplicationContext() , ActivityQuizDetail.class)
-                        .putExtra("quiz" , quizData.getQuizList().get(2)));
+                        .putExtra("parent_quiz" , quizData.getParentQuizList().get(2))
+                        .putExtra("quiz_position" , 2));
             }
         });
 
@@ -59,7 +62,8 @@ public class ActivityQuiz extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(getApplicationContext() , ActivityQuizDetail.class)
-                        .putExtra("quiz" , quizData.getQuizList().get(3)));
+                        .putExtra("parent_quiz" , quizData.getParentQuizList().get(3))
+                        .putExtra("quiz_position" , 3));
             }
         });
 

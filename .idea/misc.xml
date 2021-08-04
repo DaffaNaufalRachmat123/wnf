@@ -1,5 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/drawable-anydpi/ic_menu_blue.xml" value="0.19583333333333333" />
+        <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.19583333333333333" />
+        <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/drawable/bg_badge_false.xml" value="0.19583333333333333" />
+        <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/drawable/bg_badge_true.xml" value="0.19583333333333333" />
+        <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/drawable/bg_correct.xml" value="0.1" />
+        <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/drawable/bg_incorrect.xml" value="0.19583333333333333" />
+        <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/drawable/bg_selected.xml" value="0.19583333333333333" />
+        <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/drawable/bg_status_correct.xml" value="0.19583333333333333" />
+        <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/drawable/bg_status_incorrect.xml" value="0.19583333333333333" />
+        <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/drawable/bg_unselected.xml" value="0.19583333333333333" />
+        <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/drawable/ic_launcher_background.xml" value="0.19583333333333333" />
+        <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/layout/activity_home.xml" value="0.16666666666666666" />
+        <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/layout/activity_parent_materi.xml" value="0.1638888888888889" />
+        <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/layout/activity_quiz.xml" value="0.1" />
+        <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/layout/activity_quiz_detail.xml" value="0.16666666666666666" />
+        <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/layout/activity_quiz_page.xml" value="0.1" />
+        <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/layout/activity_sub_materi.xml" value="0.1638888888888889" />
+        <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/layout/fragment_materi.xml" value="0.16666666666666666" />
+        <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/layout/fragment_quiz.xml" value="0.175" />
+        <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/layout/item_answer.xml" value="0.175" />
+        <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/layout/item_quiz_question.xml" value="0.22" />
+        <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.19583333333333333" />
+        <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.19583333333333333" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectPlainTextFileTypeManager">
+    <file url="file://$PROJECT_DIR$/app/src/main/java/com/android/wnf/adapter/QuestionAdapter.kt" />
+  </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_12" default="true" project-jdk-name="12" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>

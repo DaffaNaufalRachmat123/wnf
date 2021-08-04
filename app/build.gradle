@@ -39,4 +39,6 @@ dependencies {
     implementation 'com.github.gregcockroft:AndroidMath:ALPHA'
     implementation 'io.nano:android-tex:1.0.0'
     implementation 'com.github.cachapa:ExpandableLayout:2.9.2'
+    implementation 'io.github.kexanie.library:MathView:0.0.6'
+    implementation 'org.greenrobot:eventbus:3.2.0'
 }

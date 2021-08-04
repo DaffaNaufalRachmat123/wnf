@@ -15,7 +15,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.wnf.adapter.MateriAdapter;
 import com.android.wnf.adapter.SubMateriAdapter;
 import com.android.wnf.model.Materi;
+import com.android.wnf.model.Materis;
 import com.android.wnf.model.SubMateri;
+import com.android.wnf.model.SubMateris;
+import com.android.wnf.model.SubMaterisData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,13 +27,13 @@ public class ActivitySubMateri extends AppCompatActivity {
     private AppCompatTextView titleText;
     private RecyclerView recyclerViewSubMateri;
     private ImageView icHome , icBack;
-    private String subTitleMateri;
     private SubMateriAdapter subMateriAdapter;
+    private Materis materi;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sub_materi);
-        subTitleMateri = getIntent().getStringExtra("sub_title_materi");
+        materi = getIntent().getParcelableExtra("materi");
         titleText = findViewById(R.id.titleText);
         recyclerViewSubMateri = findViewById(R.id.recyclerViewSubMateri);
         icHome = findViewById(R.id.icHome);
@@ -48,17 +51,17 @@ public class ActivitySubMateri extends AppCompatActivity {
                 onBackPressed();
             }
         });
-        setupMateriAdapter(new String[]{"DAFFA" , "NAUFAL" , "RACHMAT"});
+        setupMateriAdapter(materi.getSubMaterisList());
     }
-    private void setupMateriAdapter(String[] stringArray){
-        List<SubMateri> materiList = new ArrayList<>();
-        for(int i = 0; i < stringArray.length; i++)
-            materiList.add(new SubMateri(i , stringArray[i]));
+    private void setupMateriAdapter(List<SubMateris> materiList){
         subMateriAdapter = new SubMateriAdapter(this , materiList);
         subMateriAdapter.setMateriClickListener(new SubMateriAdapter.MateriClickListener() {
             @Override
             public void onClick(int position) {
-                startActivity(new Intent(getApplicationContext() , ActivityParentMateri.class));
+                Intent intent = new Intent(getApplicationContext() , ActivityParentMateri.class);
+                intent.putExtra("is_sub_materi" , true);
+                intent.putParcelableArrayListExtra("sub_materi_data_list" , (ArrayList<SubMaterisData>)materiList.get(position).getSubMaterisDataList());
+                startActivity(intent);
             }
         });
         recyclerViewSubMateri.setHasFixedSize(true);

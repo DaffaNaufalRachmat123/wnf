@@ -3,25 +3,25 @@ package com.android.wnf.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.List;
+
 public class Materi implements Parcelable {
     private int id;
     private String titleMateri;
     private String materi = "";
-    public Materi(int id , String titleMateri){
+    private List<SubMateri> subMateriList;
+    private int isSubMateri = 0;
+    public Materi(int id , String titleMateri , int isSubMateri , List<SubMateri> subMateriList){
         this.id = id;
         this.titleMateri = titleMateri;
-    }
-    public Materi(int id , String titleMateri , String materi){
-        this.id = id;
-        this.titleMateri = titleMateri;
-        this.materi = materi;
+        this.isSubMateri = isSubMateri;
+        this.subMateriList = subMateriList;
     }
     public Materi(Parcel parcel){
-        String[] arrays = new String[3];
-        parcel.readStringArray(arrays);
-        this.id = Integer.parseInt(arrays[0]);
-        this.titleMateri = arrays[1];
-        this.materi = arrays[2];
+        id = parcel.readInt();
+        titleMateri = parcel.readString();
+        isSubMateri = parcel.readInt();
+        subMateriList = parcel.readArrayList(SubMateri.class.getClassLoader());
     }
 
     @Override
@@ -34,6 +34,8 @@ public class Materi implements Parcelable {
         dest.writeInt(this.id);
         dest.writeString(this.titleMateri);
         dest.writeString(this.materi);
+        dest.writeInt(this.isSubMateri);
+        dest.writeList(this.subMateriList);
     }
 
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator(){
@@ -50,4 +52,6 @@ public class Materi implements Parcelable {
     public int getId() { return id; }
     public String getTitleMateri() { return titleMateri; }
     public String getMateri() { return materi; }
+    public int getIsSubMateri(){ return isSubMateri; }
+    public List<SubMateri> getSubMateriList(){ return subMateriList; }
 }

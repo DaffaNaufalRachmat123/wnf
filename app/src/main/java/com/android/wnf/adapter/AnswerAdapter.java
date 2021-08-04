@@ -1,11 +1,16 @@
 package com.android.wnf.adapter;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.wnf.R;
@@ -18,9 +23,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AnswerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    private Context context;
     private List<Answer> answerList = new ArrayList<>();
     private AnswerListener listener = null;
-    public AnswerAdapter(List<Answer> answerList){
+    public AnswerAdapter(Context context , List<Answer> answerList){
+        this.context = context;
         this.answerList = answerList;
     }
     public void setAnswerListener(AnswerListener listener){
@@ -29,8 +36,10 @@ public class AnswerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     class AnswerHolder extends RecyclerView.ViewHolder {
         private ImageView icState;
         private TeXView latexText;
+        private ConstraintLayout parentContainer;
         public AnswerHolder(View itemView){
             super(itemView);
+            parentContainer = itemView.findViewById(R.id.parentContainer);
             icState = itemView.findViewById(R.id.icState);
             latexText = itemView.findViewById(R.id.latexText);
         }
@@ -47,19 +56,55 @@ public class AnswerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     @Override
-    public void onBindViewHolder(@NonNull @NotNull RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, @SuppressLint("RecyclerView") int position) {
         AnswerHolder holders = (AnswerHolder) holder;
         Answer answer = answerList.get(position);
-        if(answer.isChecked()){
-            holders.icState.setImageResource(R.drawable.ic_dot_gray);
-        } else {
-            holders.icState.setImageResource(0);
+        if(answer.getResult() == -1){
+            if(answer.isChecked() == 1){
+                holders.icState.setImageResource(R.drawable.ic_dot_selected);
+                holders.icState.setBackground(ContextCompat.getDrawable(context , R.drawable.bg_dot_selected));
+                holders.parentContainer.setBackground(ContextCompat.getDrawable(context , R.drawable.bg_selected));
+            } else {
+                holders.icState.setImageResource(R.drawable.ic_dot_unselected);
+                holders.icState.setBackground(ContextCompat.getDrawable(context , R.drawable.bg_dot_unselected));
+                holders.parentContainer.setBackground(ContextCompat.getDrawable(context , R.drawable.bg_unselected));
+            }
+        } else if(answer.getResult() == 0){
+            if(answer.isChecked() == 0){
+                holders.icState.setImageResource(R.drawable.ic_dot_unselected);
+                holders.icState.setBackground(ContextCompat.getDrawable(context , R.drawable.bg_dot_unselected));
+                holders.parentContainer.setBackground(ContextCompat.getDrawable(context , R.drawable.bg_unselected));
+            } else if(answer.isChecked() == 1){
+                holders.icState.setImageResource(R.drawable.ic_dot_incorrect);
+                holders.icState.setBackground(ContextCompat.getDrawable(context , R.drawable.bg_dot_incorrect));
+                holders.parentContainer.setBackground(ContextCompat.getDrawable(context , R.drawable.bg_incorrect));
+            }
+        } else if(answer.getResult() == 1){
+            holders.icState.setImageResource(R.drawable.ic_dot_correct);
+            holders.icState.setBackground(ContextCompat.getDrawable(context , R.drawable.bg_dot_correct));
+            holders.parentContainer.setBackground(ContextCompat.getDrawable(context , R.drawable.bg_correct));
+        } else if(answer.getResult() == 2){
+            holders.icState.setImageResource(R.drawable.ic_dot_unselected);
+            holders.icState.setBackground(ContextCompat.getDrawable(context , R.drawable.bg_dot_unselected));
+            holders.parentContainer.setBackground(ContextCompat.getDrawable(context , R.drawable.bg_unselected));
         }
         holders.icState.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(listener != null){
-                    listener.onChoose(position);
+                if(answer.isClickable() == 1){
+                    if(listener != null){
+                        listener.onChoose(position);
+                    }
+                }
+            }
+        });
+        holders.parentContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(answer.isClickable() == 1){
+                    if(listener != null){
+                        listener.onChoose(position);
+                    }
                 }
             }
         });
