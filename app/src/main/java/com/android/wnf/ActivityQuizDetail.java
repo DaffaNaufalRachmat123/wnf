@@ -339,9 +339,15 @@ public class ActivityQuizDetail extends AppCompatActivity {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(WrapperCallback data){
+        Log.d("MODEL_POSITION" , String.valueOf(data.model_position));
         List<Answer> answerList = data.answerList;
         parentQuiz.getQuizList().get(data.model_position).setAnswerList(answerList);
         parentQuiz.getQuizList().get(data.model_position).setAnswer(1);
+        if(data.model_position == parentQuiz.getQuizList().size() - 1){
+            for(int i = 0; i < parentQuiz.getQuizList().size(); i++){
+                Log.d("last_answer" , String.valueOf(parentQuiz.getQuizList().get(i).getAnswerList().get(parentQuiz.getQuizList().get(i).getAnswerList().size() - 1)));
+            }
+        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

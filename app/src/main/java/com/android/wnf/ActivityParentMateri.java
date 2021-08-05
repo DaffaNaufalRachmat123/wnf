@@ -26,7 +26,6 @@ public class ActivityParentMateri extends AppCompatActivity {
     private boolean isSubMateri = false;
     private ViewPager viewPager;
     private ImageView icBack , icHome , icNext;
-    private int currentPosition = 0;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,16 +36,6 @@ public class ActivityParentMateri extends AppCompatActivity {
         icHome = findViewById(R.id.icHome);
         icNext = findViewById(R.id.icNext);
 
-        icBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(currentPosition > 0){
-                    currentPosition -= 1;
-                    viewPager.setCurrentItem(currentPosition);
-                }
-            }
-        });
-
         icHome.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -54,30 +43,31 @@ public class ActivityParentMateri extends AppCompatActivity {
             }
         });
 
+        icBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!isSubMateri){
+                    if(viewPager.getCurrentItem() > 0){
+                        viewPager.setCurrentItem(viewPager.getCurrentItem() - 1);
+                    }
+                } else {
+                    if(viewPager.getCurrentItem() > 0){
+                        viewPager.setCurrentItem(viewPager.getCurrentItem() - 1);
+                    }
+                }
+            }
+        });
+
         icNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(!isSubMateri){
-                    if(currentPosition < subMaterisList.size() - 1){
-                        icBack.setVisibility(View.VISIBLE);
-                        icNext.setVisibility(View.VISIBLE);
-                        currentPosition += 1;
-                        viewPager.setCurrentItem(currentPosition);
-                    } else if(currentPosition == 0) {
-                        icBack.setVisibility(View.INVISIBLE);
-                    } else if(currentPosition == subMaterisList.size()){
-                        icNext.setVisibility(View.INVISIBLE);
+                    if(viewPager.getCurrentItem() < subMaterisList.size() - 1){
+                        viewPager.setCurrentItem(viewPager.getCurrentItem() + 1);
                     }
                 } else {
-                    if(currentPosition < subMateriDataList.size() - 1){
-                        icBack.setVisibility(View.VISIBLE);
-                        icNext.setVisibility(View.VISIBLE);
-                        currentPosition += 1;
-                        viewPager.setCurrentItem(currentPosition);
-                    } else if(currentPosition == 0) {
-                        icBack.setVisibility(View.INVISIBLE);
-                    } else if(currentPosition == subMateriDataList.size()){
-                        icNext.setVisibility(View.INVISIBLE);
+                    if(viewPager.getCurrentItem() < subMateriDataList.size() - 1){
+                        viewPager.setCurrentItem(viewPager.getCurrentItem() + 1);
                     }
                 }
             }
@@ -87,6 +77,75 @@ public class ActivityParentMateri extends AppCompatActivity {
             subMaterisList = getIntent().getParcelableArrayListExtra("sub_materi_list");
         else
             subMateriDataList = getIntent().getParcelableArrayListExtra("sub_materi_data_list");
+
+        if(!isSubMateri){
+            if(subMaterisList.size() > 1){
+                icBack.setVisibility(View.INVISIBLE);
+                icNext.setVisibility(View.VISIBLE);
+            } else if(subMaterisList.size() == 1){
+                icBack.setVisibility(View.INVISIBLE);
+                icNext.setVisibility(View.INVISIBLE);
+            }
+        } else {
+            if(subMateriDataList.size() > 1){
+                icBack.setVisibility(View.INVISIBLE);
+                icNext.setVisibility(View.VISIBLE);
+            } else if(subMateriDataList.size() == 1){
+                icBack.setVisibility(View.INVISIBLE);
+                icNext.setVisibility(View.INVISIBLE);
+            }
+        }
+
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                if(!isSubMateri){
+                    if(viewPager.getCurrentItem() > 0 && viewPager.getCurrentItem() < subMaterisList.size() - 1){
+                        Log.d("viewPager" , "masuk sini");
+                        icBack.setVisibility(View.VISIBLE);
+                        icNext.setVisibility(View.VISIBLE);
+                    } else if(viewPager.getCurrentItem() >= 0 && viewPager.getCurrentItem() < subMaterisList.size() - 1){
+                        Log.d("viewPager" , "masuk sini 1");
+                        icNext.setVisibility(View.VISIBLE);
+                        icBack.setVisibility(View.INVISIBLE);
+                    } else {
+                        if(viewPager.getCurrentItem() == 0){
+                            Log.d("viewPager" , "masuk sini 2");
+                            icBack.setVisibility(View.INVISIBLE);
+                        } else if(viewPager.getCurrentItem() == subMaterisList.size() - 1){
+                            Log.d("viewPager" , "masuk sini 3");
+                            icBack.setVisibility(View.VISIBLE);
+                            icNext.setVisibility(View.INVISIBLE);
+                        }
+                    }
+                } else {
+                    if(viewPager.getCurrentItem() > 0 && viewPager.getCurrentItem() < subMateriDataList.size() - 1){
+                        icBack.setVisibility(View.VISIBLE);
+                        icNext.setVisibility(View.VISIBLE);
+                    } else if(viewPager.getCurrentItem() >= 0 && viewPager.getCurrentItem() < subMateriDataList.size() - 1){
+                        icNext.setVisibility(View.VISIBLE);
+                        icBack.setVisibility(View.INVISIBLE);
+                    } else {
+                        if(viewPager.getCurrentItem() == 0){
+                            icBack.setVisibility(View.INVISIBLE);
+                        } else if(viewPager.getCurrentItem() == subMateriDataList.size() - 1){
+                            icNext.setVisibility(View.INVISIBLE);
+                            icBack.setVisibility(View.VISIBLE);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
 
         MateriPagerAdapter adapter = new MateriPagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(adapter);
