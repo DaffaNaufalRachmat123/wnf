@@ -26,9 +26,9 @@ public class ActivityAbout extends AppCompatActivity {
             "<p>2.&nbsp;&nbsp; <strong>Lagu</strong><strong> 2</strong></p>\n" +
             "<ul>\n" +
             "<li>&nbsp;</li>\n" +
-            "<li><strong>Tim </strong><strong>Pengembangan</strong><strong> : Muhammad </strong><strong>Hafidh</strong> <strong>Ma&rsquo;ruf</strong><strong>, </strong><strong>dan</strong> <strong>Bapak</strong> <strong>Wahidin</strong> <strong>Mp.d</strong><strong>.</strong></li>\n" +
-            "<li><strong>Validator Media : </strong><strong>Bapak</strong><strong> Benny </strong><strong>Hendriana</strong> <strong>Mp.d</strong></li>\n" +
-            "<li><strong>Validator </strong><strong>Materi</strong><strong> : </strong><strong>Ibu</strong> <strong>Nenih</strong> <strong>M.pd</strong></li>\n" +
+            "<li><strong>\t\tTim </strong><strong>Pengembangan</strong><strong> : Muhammad </strong><strong>Hafidh</strong> <strong>Ma&rsquo;ruf</strong><strong>, </strong><strong>dan</strong> <strong>Bapak</strong> <strong>Wahidin</strong> <strong>Mp.d</strong><strong>.</strong></li>\n" +
+            "<li><strong>\t\tValidator Media : </strong><strong>Bapak</strong><strong> Benny </strong><strong>Hendriana</strong> <strong>Mp.d</strong></li>\n" +
+            "<li><strong>\t\tValidator </strong><strong>Materi</strong><strong> : </strong><strong>Ibu</strong> <strong>Nenih</strong> <strong>M.pd</strong></li>\n" +
             "</ul>";
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

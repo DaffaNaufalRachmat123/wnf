@@ -50,7 +50,7 @@ public class ActivityQuizDetail extends AppCompatActivity {
     private ParentQuiz parentQuiz;
     private ImageView icMenu , icCloseBlue;
     private int model_position = 0;
-    private int lastChoosePosition = 0;
+    private int lastChoosePosition = -1;
     private boolean isReviewQuiz = false;
     private List<QuizResult> resultsQuiz = new ArrayList<>();
     private List<Quiz> quizListReview = new ArrayList<>();
@@ -81,12 +81,20 @@ public class ActivityQuizDetail extends AppCompatActivity {
         cardTitleText = findViewById(R.id.cardTitleText);
         badgePageText = findViewById(R.id.badgePageText);
         badgeText = findViewById(R.id.badgeText);
-
         if(!isReviewQuiz){
+            viewPager.setOffscreenPageLimit(1);
             parentQuiz = getIntent().getParcelableExtra("parent_quiz");
             EventBus.getDefault().register(this);
             initializeQuizList();
             initializeNavigation();
+            for(int i = 0; i < parentQuiz.getQuizList().size(); i++){
+                Quiz quiz = parentQuiz.getQuizList().get(i);
+                Log.d("QUESTION" , quiz.getQuestion());
+                for(int j = 0; j < quiz.getAnswerList().size(); j++){
+                    Answer data = quiz.getAnswerList().get(j);
+                    Log.d("ANSWER" , data.getAnswer());
+                }
+            }
             cardTitleText.setText(getResources().getString(R.string.title_quiz , "1" , String.valueOf(parentQuiz.getQuizList().size())));
             viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
                 @Override
@@ -111,15 +119,23 @@ public class ActivityQuizDetail extends AppCompatActivity {
                         cardTitleText.setText(getResources().getString(R.string.title_quiz , String.valueOf(position + 1) , String.valueOf(totalPage)));
                         model_position = position;
                         boolean isCheckedOne = false;
+                        boolean isResult = false;
                         for(int i = 0; i < parentQuiz.getQuizList().get(model_position).getAnswerList().size(); i++){
-                            if(parentQuiz.getQuizList().get(model_position).getAnswerList().get(i).isChecked() == 1){
+                            if(parentQuiz.getQuizList().get(model_position).getAnswerList().get(i).isChecked() == 1 &&
+                                parentQuiz.getQuizList().get(model_position).getAnswerList().get(i).getResult() != -1){
                                 isCheckedOne = true;
+                                isResult = true;
                                 break;
                             }
                         }
-                        if(isCheckedOne){
+                        Log.d("isCheckedOne" , String.valueOf(isCheckedOne));
+                        Log.d("isResult" , String.valueOf(isResult));
+                        if(isCheckedOne && isResult){
+                            Log.d("statusss" , "masuk sini daf");
+                            submitText.setText("NEXT");
                             initializeBtnNext();
                         } else {
+                            Log.d("statusss" , "masuk sini coy");
                             initializeBtnSubmit();
                         }
                     }
@@ -176,6 +192,13 @@ public class ActivityQuizDetail extends AppCompatActivity {
                 bgSubmit.setVisibility(View.VISIBLE);
             }
             initializeBtnSubmit();
+            for(int i = 0; i < parentQuiz.getQuizList().size(); i++){
+                Log.d("QUIZ_QUESTION" , parentQuiz.getQuizList().get(i).getQuestion());
+                for(int j = 0; j < parentQuiz.getQuizList().get(i).getAnswerList().size(); j++){
+                    Answer answer = parentQuiz.getQuizList().get(i).getAnswerList().get(j);
+                    Log.d("QUIZ_JAWABAN" , answer.getAnswer());
+                }
+            }
         } else {
             quizListReview = getIntent().getParcelableArrayListExtra("quiz_list_review");
             icCloseBlue.setVisibility(View.VISIBLE);
@@ -291,6 +314,8 @@ public class ActivityQuizDetail extends AppCompatActivity {
                     }
                 }
             });
+            btnPrev.setEnabled(false);
+            btnPrev.setCardBackgroundColor(getResources().getColor(R.color.blue_1));
         }
     }
 
@@ -318,7 +343,7 @@ public class ActivityQuizDetail extends AppCompatActivity {
                 isSuccess = 0;
             else
                 isSuccess = 1;
-            Quiz result = new Quiz(-999 , "" , 0 , new ArrayList<>() , score_points , isSuccess , 0);
+            Quiz result = new Quiz(-999 , "" , 0 , new ArrayList<>() , 0, score_points , isSuccess , 0);
             parentQuiz.getQuizList().add(result);
             adapter.notifyDataSetChanged();
             if(!isReviewQuiz){
@@ -332,7 +357,6 @@ public class ActivityQuizDetail extends AppCompatActivity {
     public void onEvent(WrapperPosition data){
         Log.d("passed_positions" , String.format("%s AND %s" , String.valueOf(data.model_position) , String.valueOf(data.lastChoosePosition)));
         parentQuiz.getQuizList().get(data.model_position).setAnswerList(data.answerList);
-        List<Answer> answerList = parentQuiz.getQuizList().get(data.model_position).getAnswerList();
         this.model_position = data.model_position;
         this.lastChoosePosition = data.lastChoosePosition;
     }
@@ -343,11 +367,6 @@ public class ActivityQuizDetail extends AppCompatActivity {
         List<Answer> answerList = data.answerList;
         parentQuiz.getQuizList().get(data.model_position).setAnswerList(answerList);
         parentQuiz.getQuizList().get(data.model_position).setAnswer(1);
-        if(data.model_position == parentQuiz.getQuizList().size() - 1){
-            for(int i = 0; i < parentQuiz.getQuizList().size(); i++){
-                Log.d("last_answer" , String.valueOf(parentQuiz.getQuizList().get(i).getAnswerList().get(parentQuiz.getQuizList().get(i).getAnswerList().size() - 1)));
-            }
-        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -413,9 +432,22 @@ public class ActivityQuizDetail extends AppCompatActivity {
         btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                for(int i = 0; i < parentQuiz.getQuizList().get(model_position).getAnswerList().size(); i++){
+                    if(parentQuiz.getQuizList().get(model_position).getAnswerList().get(i).isChecked() == 1){
+                        lastChoosePosition = i;
+                        break;
+                    }
+                }
+                Log.d("lastChoosePositions" , String.valueOf(lastChoosePosition));
+                Log.d("choose_possssS" , String.valueOf(lastChoosePosition));
                 if(lastChoosePosition != -1){
+                    Log.d("choose_pos" , "masuk sini oy");
                     EventBus.getDefault().post(new FragmentQuiz.TriggerChange(model_position , lastChoosePosition));
+                    parentQuiz.getQuizList().get(model_position).setIsResult(1);
                     initializeBtnNext();
+                } else {
+                    Toast.makeText(getApplicationContext() , "Pilih Jawaban Dahulu" , Toast.LENGTH_SHORT).show();
+                    Log.d("choose_pos" , "masuk sini daf");
                 }
             }
         });
@@ -431,6 +463,16 @@ public class ActivityQuizDetail extends AppCompatActivity {
                     model_position = count + 1;
                     lastChoosePosition = -1;
                     viewPager.setCurrentItem(count + 1);
+                    boolean atleast_clicked = false;
+                    for(int i = 0; i < parentQuiz.getQuizList().get(count + 1).getAnswerList().size(); i++){
+                        if(parentQuiz.getQuizList().get(count + 1).getAnswerList().get(i).isChecked() == 1){
+                            atleast_clicked = true;
+                            break;
+                        }
+                    }
+                    if(atleast_clicked){
+                        initializeBtnSubmit();
+                    }
                 } else {
                     boolean atleast_one = false;
                     for(Quiz quiz : parentQuiz.getQuizList()){
@@ -477,6 +519,7 @@ public class ActivityQuizDetail extends AppCompatActivity {
                 if(!isReviewQuiz){
                     viewPager.setCurrentItem(position);
                     model_position = position;
+                    Log.d("question_adapter" , "masuk sini daf");
                     lastChoosePosition = -1;
                 } else {
                     viewPagerReview.setCurrentItem(position);
@@ -507,9 +550,14 @@ public class ActivityQuizDetail extends AppCompatActivity {
         @Override
         public Fragment getItem(int position) {
             if(quizList.get(position).getId() == - 999){
-                return FragmentQuiz.newInstance(quizList.get(position) , position , true , true);
+                return FragmentQuiz.newInstance(quizList.get(position) , quizList.get(position).getAnswerList() , quizPosition, position , true , true);
             } else {
-                return FragmentQuiz.newInstance(quizList.get(position) , position , false , false);
+                Log.d("POSITION_VIEW" , String.valueOf(position));
+                for(int i = 0; i < quizList.get(position).getAnswerList().size(); i++){
+                    Answer data = quizList.get(position).getAnswerList().get(i);
+                    Log.d("DATA_JAWAB" , data.getAnswer());
+                }
+                return FragmentQuiz.newInstance(quizList.get(position) , quizList.get(position).getAnswerList() , quizPosition, position , false , false);
             }
         }
     }
@@ -528,7 +576,7 @@ public class ActivityQuizDetail extends AppCompatActivity {
         @NonNull
         @Override
         public Fragment getItem(int position) {
-            return FragmentQuiz.newInstance(quizList.get(position) , position , true , false);
+            return FragmentQuiz.newInstance(quizList.get(position) ,  quizList.get(position).getAnswerList() , quizPosition , position , true , false);
         }
     }
 }

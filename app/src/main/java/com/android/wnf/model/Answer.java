@@ -27,6 +27,15 @@ public class Answer implements Parcelable {
     public void setClickable(int isClickable){
         this.isClickable = isClickable;
     }
+    public void setId(int id){
+        this.id = id;
+    }
+    public void setAnswer(String answer){
+        this.answer = answer;
+    }
+    public void setIsCorrect(int isCorrect){
+        this.isChecked = isCorrect;
+    }
     public void setChecked(int isChecked){
         this.isChecked = isChecked;
     }

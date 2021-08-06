@@ -13,11 +13,13 @@ public class Quiz implements Parcelable {
     private int score_points = 0;
     private int isSuccess = 0;
     private int isAnswer = 0;
-    public Quiz(int id , String question , int soundResource , List<Answer> answerList , int score_points , int isSuccess , int isAnswer){
+    private int isResult = -1;
+    public Quiz(int id , String question , int soundResource , List<Answer> answerList , int isResult , int score_points , int isSuccess , int isAnswer){
         this.id = id;
         this.question = question;
         this.soundResource = soundResource;
         this.answerList = answerList;
+        this.isResult = isResult;
         this.score_points = score_points;
         this.isSuccess = isSuccess;
         this.isAnswer = isAnswer;
@@ -27,6 +29,7 @@ public class Quiz implements Parcelable {
     public int getSoundResource(){ return soundResource; }
     public int getScorePoints(){ return score_points; }
     public int isSuccess(){ return isSuccess; }
+    public int getIsResult(){ return isResult; }
     public int getIsAnswer(){ return isAnswer; }
     public List<Answer> getAnswerList(){ return answerList; }
     public void setAnswerList(List<Answer> answerList){
@@ -35,6 +38,10 @@ public class Quiz implements Parcelable {
 
     public void setAnswer(int isAnswer){
         this.isAnswer = isAnswer;
+    }
+
+    public void setIsResult(int isResult){
+        this.isResult = isResult;
     }
 
     @Override
@@ -52,6 +59,7 @@ public class Quiz implements Parcelable {
         question = parcel.readString();
         soundResource = parcel.readInt();
         answerList = parcel.readArrayList(Answer.class.getClassLoader());
+        isResult = parcel.readInt();
         score_points = parcel.readInt();
         isSuccess = parcel.readInt();
         isAnswer = parcel.readInt();
@@ -63,6 +71,7 @@ public class Quiz implements Parcelable {
         dest.writeString(this.question);
         dest.writeInt(this.soundResource);
         dest.writeList(this.answerList);
+        dest.writeInt(this.isResult);
         dest.writeInt(this.score_points);
         dest.writeInt(this.isSuccess);
         dest.writeInt(this.isAnswer);

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -51,10 +52,12 @@ public class FragmentQuiz extends Fragment {
     private MediaPlayer player;
     private boolean isPlaying = false;
     private Handler handler = new Handler();
+    private List<Answer> answerList;
     private AnswerAdapter mAdapter;
     private boolean isRegistered = false;
     private boolean isReview = false;
     private boolean isResult = false;
+    private int parent_position = -1;
     private int model_position = -1;
     private int lastChoosePosition = -1;
     
@@ -66,12 +69,14 @@ public class FragmentQuiz extends Fragment {
         contexts = context;
     }
 
-    public static FragmentQuiz newInstance(Quiz quiz_data , int model_position , boolean isReview , boolean isResult){
+    public static FragmentQuiz newInstance(Quiz quiz_data , List<Answer> answerList , int parent_position , int model_position , boolean isReview , boolean isResult){
         FragmentQuiz quiz = new FragmentQuiz();
         Bundle bundle = new Bundle();
         bundle.putParcelable("quiz" , quiz_data);
+        bundle.putParcelableArrayList("answer_list" , (ArrayList<Answer>) answerList);
         bundle.putBoolean("is_review" , isReview);
         bundle.putBoolean("is_result" , isResult);
+        bundle.putInt("parent_position" , parent_position);
         bundle.putInt("model_position" , model_position);
         quiz.setArguments(bundle);
         return quiz;
@@ -81,8 +86,10 @@ public class FragmentQuiz extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         quizData = getArguments().getParcelable("quiz");
+        answerList = getArguments().getParcelableArrayList("answer_list");
         isReview = getArguments().getBoolean("is_review" , false);
         isResult = getArguments().getBoolean("is_result" , false);
+        parent_position = getArguments().getInt("parent_position" , 0);
         model_position = getArguments().getInt("model_position" , 0);
     }
 
@@ -101,8 +108,17 @@ public class FragmentQuiz extends Fragment {
             isRegistered = true;
         }
         initView(view);
+        for(int i = 0; i < answerList.size(); i++){
+            Log.d("answer_ansawer" , answerList.get(i).getAnswer());
+        }
         if(quizData != null){
             if(!isReview){
+                Log.d("question" , quizData.getQuestion());
+                Log.d("is_result" , String.valueOf(quizData.getIsResult()));
+                Log.d("is_answer" , String.valueOf(quizData.getIsAnswer()));
+                if(quizData.getIsResult() == 0){
+                    quizData.setAnswerList(new QuizData().getParentQuizList().get(parent_position).getQuizList().get(model_position).getAnswerList());
+                }
                 initializeQuestion();
                 initializePlayer();
                 initSeekBar();
@@ -390,6 +406,11 @@ public class FragmentQuiz extends Fragment {
         });
     }
     private void initAnswerList(){
+        Log.d("questionss" , quizData.getQuestion());
+        for(int i = 0; i < quizData.getAnswerList().size(); i++){
+            Answer data = quizData.getAnswerList().get(i);
+            Log.d("answerss" , data.getAnswer());
+        }
         recyclerViewAnswer.setHasFixedSize(true);
         recyclerViewAnswer.setItemAnimator(null);
         recyclerViewAnswer.setLayoutManager(new LinearLayoutManager(contexts , RecyclerView.VERTICAL , false));
@@ -398,20 +419,30 @@ public class FragmentQuiz extends Fragment {
             @Override
             public void onChoose(int position) {
                 if(lastChoosePosition != -1){
+                    Log.d("onClick" , "masuk sini daf");
                     quizData.getAnswerList().get(lastChoosePosition).setChecked(0);
                     mAdapter.notifyItemChanged(lastChoosePosition);
                     lastChoosePosition = position;
                     quizData.getAnswerList().get(lastChoosePosition).setChecked(1);
                     mAdapter.notifyItemChanged(lastChoosePosition);
                 } else {
+                    Log.d("onClick" , "masuk sini rul");
                     lastChoosePosition = position;
                     quizData.getAnswerList().get(lastChoosePosition).setChecked(1);
                     mAdapter.notifyItemChanged(lastChoosePosition);
                 }
+                Log.d("getResult" , String.valueOf(quizData.getAnswerList().get(lastChoosePosition).getResult()));
+                Log.d("getChecked" , String.valueOf(quizData.getAnswerList().get(lastChoosePosition).isChecked()));
                 EventBus.getDefault().post(new ActivityQuizDetail.WrapperPosition(model_position , lastChoosePosition , quizData.getAnswerList()));
             }
         });
         recyclerViewAnswer.setAdapter(mAdapter);
+        for(int i = 0; i < quizData.getAnswerList().size(); i++){
+            if(quizData.getAnswerList().get(i).isChecked() == 1){
+                EventBus.getDefault().post(new ActivityQuizDetail.WrapperPosition(model_position , i , quizData.getAnswerList()));
+                break;
+            }
+        }
     }
 
     @Override

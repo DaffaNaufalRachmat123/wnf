@@ -37,7 +37,9 @@ public class ActivityQuizPage extends AppCompatActivity {
         btnMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                new ActivityQuizDetail().finish();
+                finish();
+                startActivity(new Intent(getApplicationContext() , ActivityQuiz.class));
             }
         });
     }
