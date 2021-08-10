@@ -78,7 +78,7 @@ public class QuizData {
                 add(new Answer(38 , "\\frac{1}{5}" , 0 , 0, -1 , 1));
                 add(new Answer(39 , "\\frac{1}{2}" , 0 , 1, -1 , 1));
             }}, 0 , 0 ,0 , 0));
-        }}));
+        }}));//
 
         parentQuizList.add(new ParentQuiz(2 , "Quiz 3" , new ArrayList<Quiz>(){{
             add(new Quiz(4 , "\\textbf{Manakah yang disebut Bilangan Genap...}" , R.raw.happy_girly , new ArrayList<Answer>() {{
