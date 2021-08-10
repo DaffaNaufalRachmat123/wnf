@@ -18,16 +18,16 @@
         app:layout_constraintVertical_bias="0.349">
 
         <LinearLayout
-            android:id="@+id/linearLayout3"
+            android:id="@+id/tentangArea"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="@+id/linearLayout4"
+            app:layout_constraintBottom_toBottomOf="@+id/quizArea"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/linearLayout4"
-            app:layout_constraintTop_toTopOf="@+id/linearLayout4">
+            app:layout_constraintStart_toEndOf="@+id/quizArea"
+            app:layout_constraintTop_toTopOf="@+id/quizArea">
 
             <ImageView
                 android:layout_width="200dp"
@@ -51,16 +51,16 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/linearLayout4"
+            android:id="@+id/quizArea"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
             android:gravity="center"
             android:orientation="vertical"
-            app:layout_constraintEnd_toStartOf="@+id/linearLayout3"
+            app:layout_constraintEnd_toStartOf="@+id/tentangArea"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/linearLayout2">
+            app:layout_constraintTop_toBottomOf="@+id/bulatArea">
 
             <ImageView
                 android:layout_width="200dp"
@@ -85,16 +85,16 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/linearLayout"
+            android:id="@+id/pecahanArea"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="@+id/linearLayout2"
+            app:layout_constraintBottom_toBottomOf="@+id/bulatArea"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/linearLayout2"
-            app:layout_constraintTop_toTopOf="@+id/linearLayout2">
+            app:layout_constraintStart_toEndOf="@+id/bulatArea"
+            app:layout_constraintTop_toTopOf="@+id/bulatArea">
 
             <ImageView
                 android:layout_width="200dp"
@@ -119,12 +119,12 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/linearLayout2"
+            android:id="@+id/bulatArea"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:orientation="vertical"
-            app:layout_constraintEnd_toStartOf="@+id/linearLayout"
+            app:layout_constraintEnd_toStartOf="@+id/pecahanArea"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">

@@ -3,18 +3,19 @@ package com.android.wnf.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Quiz implements Parcelable {
     private int id;
     private String question;
     private int soundResource;
-    private List<Answer> answerList;
+    private ArrayList<Answer> answerList;
     private int score_points = 0;
     private int isSuccess = 0;
     private int isAnswer = 0;
     private int isResult = -1;
-    public Quiz(int id , String question , int soundResource , List<Answer> answerList , int isResult , int score_points , int isSuccess , int isAnswer){
+    public Quiz(int id , String question , int soundResource , ArrayList<Answer> answerList , int isResult , int score_points , int isSuccess , int isAnswer){
         this.id = id;
         this.question = question;
         this.soundResource = soundResource;
@@ -31,8 +32,8 @@ public class Quiz implements Parcelable {
     public int isSuccess(){ return isSuccess; }
     public int getIsResult(){ return isResult; }
     public int getIsAnswer(){ return isAnswer; }
-    public List<Answer> getAnswerList(){ return answerList; }
-    public void setAnswerList(List<Answer> answerList){
+    public ArrayList<Answer> getAnswerList(){ return answerList; }
+    public void setAnswerList(ArrayList<Answer> answerList){
         this.answerList = answerList;
     }
 

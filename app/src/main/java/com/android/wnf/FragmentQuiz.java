@@ -37,6 +37,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class FragmentQuiz extends Fragment {
     private ConstraintLayout headerStatus , constraintQuestion;
@@ -346,6 +347,7 @@ public class FragmentQuiz extends Fragment {
                             player.stop();
                             player.release();
                             player = null;
+                            minuteText.setText("00:00");
                             initializePlayer();
                             seekBar.setProgress(0);
                             icStateSound.setImageResource(R.drawable.ic_play);
@@ -457,6 +459,14 @@ public class FragmentQuiz extends Fragment {
             @Override
             public void run() {
                 if(player != null){
+                    int currentDur = player.getCurrentPosition();
+                    String minute = String.valueOf((currentDur / 1000) / 60);
+                    String second = String.valueOf((currentDur / 1000) % 60);
+                    if(minute.length() == 1)
+                        minute = "0" + String.valueOf((currentDur / 1000) / 60);
+                    if(second.length() == 1)
+                        second = "0" + String.valueOf((currentDur / 1000) % 60);
+                    minuteText.setText(minute + ":" + second);
                     seekBar.setProgress(player.getCurrentPosition());
                     handler.postDelayed(this , 1000);
                 }

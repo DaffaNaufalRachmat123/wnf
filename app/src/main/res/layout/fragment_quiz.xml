@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView android:id="@+id/nestedScrollView"
+<androidx.core.widget.NestedScrollView
+    android:id="@+id/nestedScrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
@@ -120,7 +121,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:textColor="@color/black"
-                android:textSize="17sp"
+                android:textSize="20sp"
                 app:engine="KaTeX"
                 android:layout_marginStart="30dp"
                 android:layout_marginEnd="30dp"

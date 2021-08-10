@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,6 +23,7 @@ import java.util.List;
 public class ActivityHome extends AppCompatActivity {
     private AppCompatButton btnBulat, btnPecahan, btnQuiz, btnTentang;
     private MateriData materiData;
+    private LinearLayout bulatArea , pecahanArea , quizArea , tentangArea;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,6 +33,10 @@ public class ActivityHome extends AppCompatActivity {
         btnPecahan = findViewById(R.id.btnPecahan);
         btnQuiz = findViewById(R.id.btnQuiz);
         btnTentang = findViewById(R.id.btnTentang);
+        bulatArea = findViewById(R.id.bulatArea);
+        pecahanArea = findViewById(R.id.pecahanArea);
+        quizArea = findViewById(R.id.quizArea);
+        tentangArea = findViewById(R.id.tentangArea);
 
         btnBulat.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -38,8 +44,20 @@ public class ActivityHome extends AppCompatActivity {
                 startMateri(0);
             }
         });
+        bulatArea.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startMateri(0);
+            }
+        });
 
         btnPecahan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startMateri(1);
+            }
+        });
+        pecahanArea.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startMateri(1);
@@ -55,8 +73,20 @@ public class ActivityHome extends AppCompatActivity {
                 startActivity(new Intent(getApplicationContext() , ActivityQuiz.class));
             }
         });
+        quizArea.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext() , ActivityQuiz.class));
+            }
+        });
 
         btnTentang.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext() , ActivityAbout.class));
+            }
+        });
+        tentangArea.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(getApplicationContext() , ActivityAbout.class));

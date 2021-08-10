@@ -65,7 +65,7 @@ public class MateriData {
 
         parentMateriList.add(new ParentMateris(2 , "Materi Bilangan Pecahan" , new ArrayList(){{
             add(new Materis(0 , "Pengertian Bilangan Pecahan" , 0 , new ArrayList(){{
-                add(new SubMateris(0 , "" , R.drawable.pengertian_bil_pecahan , new ArrayList()));
+                add(new SubMateris(0 , "Pengertian Bilangan Pecahan" , R.drawable.pengertian_bil_pecahan , new ArrayList()));
             }}));
             add(new Materis(1 , "Macam - Macam Bilangan Pecahan" ,1 , new ArrayList(){{
                 add(new SubMateris( 0 , "Macam - Macam Bilangan Pecahan" , 0 , new ArrayList(){{

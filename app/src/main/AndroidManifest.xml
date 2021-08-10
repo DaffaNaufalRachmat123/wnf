@@ -26,5 +26,6 @@
         <activity android:name=".ActivityAbout" android:theme="@style/AppTheme.NoActionBar"/>
         <activity android:name=".ActivitySubMateri" android:theme="@style/AppTheme.NoActionBar"/>
         <activity android:name=".ActivityQuizPage" android:theme="@style/AppTheme.NoActionBar"/>
+        <activity android:name=".ActivityQuizPager" android:theme="@style/AppTheme.NoActionBar"/>
     </application>
 </manifest>

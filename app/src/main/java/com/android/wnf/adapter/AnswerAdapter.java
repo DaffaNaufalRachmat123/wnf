@@ -24,12 +24,17 @@ import java.util.List;
 
 public class AnswerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private Context context;
-    private List<Answer> answerList = new ArrayList<>();
+    private ArrayList<Answer> answerList = new ArrayList<>();
     private AnswerListener listener = null;
-    public AnswerAdapter(Context context , List<Answer> answerList){
+    private boolean isClickable = true;
+    public AnswerAdapter(Context context , ArrayList<Answer> answerList){
         this.context = context;
         this.answerList = answerList;
     }
+    public void setClickable(boolean isClickable){
+        this.isClickable = isClickable;
+    }
+    public boolean isClickable(){ return isClickable; }
     public void setAnswerListener(AnswerListener listener){
         this.listener = listener;
     }
@@ -91,6 +96,7 @@ public class AnswerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         holders.icState.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d("isClickable" , String.valueOf(answer.isClickable()));
                 if(answer.isClickable() == 1){
                     if(listener != null){
                         listener.onChoose(position);
@@ -101,6 +107,7 @@ public class AnswerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         holders.parentContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d("isClickable" , String.valueOf(answer.isClickable()));
                 if(answer.isClickable() == 1){
                     if(listener != null){
                         listener.onChoose(position);

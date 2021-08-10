@@ -16,6 +16,15 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        release {
+            keyAlias 'wnf_alias'
+            keyPassword 'wnf_123456'
+            storeFile file('wnf.keystore')
+            storePassword 'wnf_123456'
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false

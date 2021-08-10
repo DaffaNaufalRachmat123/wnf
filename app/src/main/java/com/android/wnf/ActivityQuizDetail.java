@@ -364,8 +364,6 @@ public class ActivityQuizDetail extends AppCompatActivity {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(WrapperCallback data){
         Log.d("MODEL_POSITION" , String.valueOf(data.model_position));
-        List<Answer> answerList = data.answerList;
-        parentQuiz.getQuizList().get(data.model_position).setAnswerList(answerList);
         parentQuiz.getQuizList().get(data.model_position).setAnswer(1);
     }
 
@@ -407,8 +405,8 @@ public class ActivityQuizDetail extends AppCompatActivity {
     static class WrapperPosition {
         int model_position;
         int lastChoosePosition;
-        List<Answer> answerList;
-        WrapperPosition(int model_position , int lastChoosePosition , List<Answer> answerList){
+        ArrayList<Answer> answerList;
+        WrapperPosition(int model_position , int lastChoosePosition , ArrayList<Answer> answerList){
             this.model_position = model_position;
             this.lastChoosePosition = lastChoosePosition;
             this.answerList = answerList;
@@ -417,8 +415,8 @@ public class ActivityQuizDetail extends AppCompatActivity {
 
     static class WrapperCallback {
         int model_position;
-        List<Answer> answerList;
-        WrapperCallback(int model_position , List<Answer> answerList){
+        ArrayList<Answer> answerList;
+        WrapperCallback(int model_position , ArrayList<Answer> answerList){
             this.model_position = model_position;
             this.answerList = answerList;
         }
