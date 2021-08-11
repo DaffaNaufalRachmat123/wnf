@@ -1,6 +1,9 @@
 package com.android.wnf;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -61,9 +64,7 @@ public class FragmentQuiz extends Fragment {
     private int parent_position = -1;
     private int model_position = -1;
     private int lastChoosePosition = -1;
-    
     private Context contexts;
-
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
@@ -92,6 +93,10 @@ public class FragmentQuiz extends Fragment {
         isResult = getArguments().getBoolean("is_result" , false);
         parent_position = getArguments().getInt("parent_position" , 0);
         model_position = getArguments().getInt("model_position" , 0);
+        if(!isRegistered){
+            EventBus.getDefault().register(this);
+            isRegistered = true;
+        }
     }
 
     @Nullable
@@ -104,26 +109,15 @@ public class FragmentQuiz extends Fragment {
     @Override
     public void onViewCreated(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if(!isRegistered){
-            EventBus.getDefault().register(this);
-            isRegistered = true;
-        }
         initView(view);
-        for(int i = 0; i < answerList.size(); i++){
-            Log.d("answer_ansawer" , answerList.get(i).getAnswer());
-        }
+        Log.d("ON_VIEW_CREATED" , String.valueOf(model_position));
         if(quizData != null){
             if(!isReview){
-                Log.d("question" , quizData.getQuestion());
-                Log.d("is_result" , String.valueOf(quizData.getIsResult()));
-                Log.d("is_answer" , String.valueOf(quizData.getIsAnswer()));
-                if(quizData.getIsResult() == 0){
-                    quizData.setAnswerList(new QuizData().getParentQuizList().get(parent_position).getQuizList().get(model_position).getAnswerList());
-                }
                 initializeQuestion();
                 initializePlayer();
                 initSeekBar();
                 initAnswerList();
+                playSoundFirst();
                 icStateSound.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -135,6 +129,11 @@ public class FragmentQuiz extends Fragment {
                     Log.d("RESULT_PAGE" , "masuk sini daf");
                     constraintQuestion.setVisibility(View.GONE);
                     resultView.setVisibility(View.VISIBLE);
+                    if(player != null){
+                        player.stop();
+                        player.reset();
+                        player.release();
+                    }
                     if(quizData.isSuccess() == 1){
                         icStatusResult.setBackground(ContextCompat.getDrawable(contexts , R.drawable.bg_circle_green));
                         icStatusResult.setImageResource(R.drawable.ic_done_white);
@@ -177,6 +176,12 @@ public class FragmentQuiz extends Fragment {
         }
     }
 
+    private void playSoundFirst(){
+        if(!ActivityQuizDetail.isPlayingMusic){
+            ActivityQuizDetail.isPlayingMusic = true;
+            playSound();
+        }
+    }
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(WrapperResult result){
         constraintQuestion.setVisibility(View.GONE);
@@ -207,17 +212,15 @@ public class FragmentQuiz extends Fragment {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(ChangeData data){
-        quizData = data.quiz;
-        lastChoosePosition = -1;
-        initializePlayer();
-        initializeQuestion();
-        initAnswerList();
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(TriggerChange data){
-        Log.d("LAST_CHOOSE_POSITION" , String.valueOf(lastChoosePosition));
+        Log.d("POS_FRAG" , String.valueOf(data.model_position) + " | " + String.valueOf(model_position));
+        if(data.model_position == model_position) {
+            for (int i = 0; i < quizData.getAnswerList().size(); i++) {
+                if (quizData.getAnswerList().get(i).isChecked() == 1) {
+                    lastChoosePosition = i;
+                }
+            }
+        }
         if(lastChoosePosition != -1){
             boolean isTrue = quizData.getAnswerList().get(lastChoosePosition).isCorrect() == 1;
             if(isTrue){
@@ -244,18 +247,41 @@ public class FragmentQuiz extends Fragment {
             for(int i = 0; i < quizData.getAnswerList().size(); i++){
                 quizData.getAnswerList().get(i).setClickable(0);
             }
+            lastChoosePosition = -1;
             EventBus.getDefault().post(new ActivityQuizDetail.WrapperCallback(model_position , quizData.getAnswerList()));
             mAdapter.notifyDataSetChanged();
         }
     }
 
-    static class ChangeData {
-        int model_position;
-        Quiz quiz;
-        ChangeData(int model_position , Quiz quiz){
-            this.model_position = model_position;
-            this.quiz = quiz;
+    @Subscribe(sticky = true , threadMode = ThreadMode.MAIN)
+    public void onEvent(PlaySound data){
+        if(quizData.getId() == data.quizId){
+            player = null;
+            initializePlayer();
+            initSeekBar();
+            playSound();
         }
+        Log.d("QUIZ_ID" , String.valueOf(quizData.getId()) + " | " + String.valueOf(data.quizId) + " Sound : " + String.valueOf(quizData.getSoundResource()));
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(StopSound data){
+        if(player != null){
+            player.stop();
+            handler.removeCallbacksAndMessages(null);
+            isPlaying = false;
+            seekBar.setProgress(0);
+            minuteText.setText("00:00");
+            icStateSound.setImageResource(R.drawable.ic_play);
+        }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(ResetSound data){
+        player.stop();
+        player.reset();
+        player.release();
+        player = null;
     }
 
     static class TriggerChange {
@@ -276,9 +302,21 @@ public class FragmentQuiz extends Fragment {
         }
     }
 
+    static class PlaySound {
+        int quizId;
+        int soundResource;
+        public PlaySound(int quizId , int soundResource){
+            this.quizId = quizId;
+            this.soundResource = soundResource;
+        }
+    }
+    static class StopSound {}
+    static class ResetSound {}
+
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Log.d("ON_DESTROY" , String.valueOf(model_position));
         EventBus.getDefault().unregister(this);
         if(player != null){
             player.reset();
@@ -286,6 +324,13 @@ public class FragmentQuiz extends Fragment {
             player = null;
         }
     }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        Log.d("ON_DETACH" , String.valueOf(model_position));
+    }
+
     private void initView(View view){
         headerStatus = view.findViewById(R.id.headerStatus);
         constraintQuestion = view.findViewById(R.id.constraintQuestion);
@@ -307,12 +352,14 @@ public class FragmentQuiz extends Fragment {
     }
     private void initializeQuestion(){
         questionText.setLaTeX(quizData.getQuestion());
+        questionText.setTextSize(50);
     }
     private void initializeStatus(){
         boolean isCheckedOne = false;
         int positionChecked = -1;
         for(int i = 0; i < quizData.getAnswerList().size(); i++){
-            if(quizData.getAnswerList().get(i).isChecked() == 1){
+            if(quizData.getAnswerList().get(i).isChecked() == 1 &&
+                quizData.getAnswerList().get(i).getResult() != -1){
                 isCheckedOne = true;
                 positionChecked = i;
                 break;
@@ -336,6 +383,7 @@ public class FragmentQuiz extends Fragment {
     }
     private void initializePlayer(){
         if(quizData != null){
+            Log.d("INIT_PLAYER" , "GK NULL");
             player = MediaPlayer.create(contexts , quizData.getSoundResource());
             player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
@@ -408,11 +456,6 @@ public class FragmentQuiz extends Fragment {
         });
     }
     private void initAnswerList(){
-        Log.d("questionss" , quizData.getQuestion());
-        for(int i = 0; i < quizData.getAnswerList().size(); i++){
-            Answer data = quizData.getAnswerList().get(i);
-            Log.d("answerss" , data.getAnswer());
-        }
         recyclerViewAnswer.setHasFixedSize(true);
         recyclerViewAnswer.setItemAnimator(null);
         recyclerViewAnswer.setLayoutManager(new LinearLayoutManager(contexts , RecyclerView.VERTICAL , false));
@@ -421,20 +464,16 @@ public class FragmentQuiz extends Fragment {
             @Override
             public void onChoose(int position) {
                 if(lastChoosePosition != -1){
-                    Log.d("onClick" , "masuk sini daf");
                     quizData.getAnswerList().get(lastChoosePosition).setChecked(0);
                     mAdapter.notifyItemChanged(lastChoosePosition);
                     lastChoosePosition = position;
                     quizData.getAnswerList().get(lastChoosePosition).setChecked(1);
                     mAdapter.notifyItemChanged(lastChoosePosition);
                 } else {
-                    Log.d("onClick" , "masuk sini rul");
                     lastChoosePosition = position;
                     quizData.getAnswerList().get(lastChoosePosition).setChecked(1);
                     mAdapter.notifyItemChanged(lastChoosePosition);
                 }
-                Log.d("getResult" , String.valueOf(quizData.getAnswerList().get(lastChoosePosition).getResult()));
-                Log.d("getChecked" , String.valueOf(quizData.getAnswerList().get(lastChoosePosition).isChecked()));
                 EventBus.getDefault().post(new ActivityQuizDetail.WrapperPosition(model_position , lastChoosePosition , quizData.getAnswerList()));
             }
         });
@@ -450,7 +489,6 @@ public class FragmentQuiz extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        Log.d("onResumeFrag" , "onResume()");
         initializeStatus();
     }
 

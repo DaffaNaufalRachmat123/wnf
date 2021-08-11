@@ -8,6 +8,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 
+import org.greenrobot.eventbus.EventBus;
+
 public class ActivityQuizPage extends AppCompatActivity {
     private AppCompatButton btnMenu , btnOtherQuiz;
     private boolean isAnotherQuiz = false;
@@ -27,6 +29,7 @@ public class ActivityQuizPage extends AppCompatActivity {
             btnOtherQuiz.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    EventBus.getDefault().post(new ActivityQuizDetail.FinishQuiz());
                     startActivity(new Intent(getApplicationContext() , ActivityQuizDetail.class)
                             .putExtra("is_review" , false)
                     .putExtra("parent_quiz" , new QuizData().getParentQuizList().get(numberQuiz))
@@ -37,7 +40,7 @@ public class ActivityQuizPage extends AppCompatActivity {
         btnMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new ActivityQuizDetail().finish();
+                EventBus.getDefault().post(new ActivityQuizDetail.FinishQuiz());
                 finish();
                 startActivity(new Intent(getApplicationContext() , ActivityQuiz.class));
             }

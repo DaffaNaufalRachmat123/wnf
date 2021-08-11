@@ -35,6 +35,7 @@ public class ActivitySubMateri extends AppCompatActivity {
         setContentView(R.layout.activity_sub_materi);
         materi = getIntent().getParcelableExtra("materi");
         titleText = findViewById(R.id.titleText);
+        titleText.setText(materi.getTitle());
         recyclerViewSubMateri = findViewById(R.id.recyclerViewSubMateri);
         icHome = findViewById(R.id.icHome);
         icBack = findViewById(R.id.icBack);

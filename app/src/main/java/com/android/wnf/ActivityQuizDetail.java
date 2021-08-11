@@ -1,10 +1,13 @@
 package com.android.wnf;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -23,6 +26,7 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.android.wnf.adapter.QuestionAdapter;
@@ -59,6 +63,8 @@ public class ActivityQuizDetail extends AppCompatActivity {
     private RecyclerView recyclerViewNav;
     private boolean isExpanded = false;
     private boolean isResultAdded = false;
+    public static boolean isPlayingMusic = false;
+    public static boolean isInitialized = false;
     private int quizPosition = 0;
 
     @Override
@@ -84,17 +90,8 @@ public class ActivityQuizDetail extends AppCompatActivity {
         if(!isReviewQuiz){
             viewPager.setOffscreenPageLimit(1);
             parentQuiz = getIntent().getParcelableExtra("parent_quiz");
-            EventBus.getDefault().register(this);
             initializeQuizList();
             initializeNavigation();
-            for(int i = 0; i < parentQuiz.getQuizList().size(); i++){
-                Quiz quiz = parentQuiz.getQuizList().get(i);
-                Log.d("QUESTION" , quiz.getQuestion());
-                for(int j = 0; j < quiz.getAnswerList().size(); j++){
-                    Answer data = quiz.getAnswerList().get(j);
-                    Log.d("ANSWER" , data.getAnswer());
-                }
-            }
             cardTitleText.setText(getResources().getString(R.string.title_quiz , "1" , String.valueOf(parentQuiz.getQuizList().size())));
             viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
                 @Override
@@ -104,10 +101,7 @@ public class ActivityQuizDetail extends AppCompatActivity {
 
                 @Override
                 public void onPageSelected(int position) {
-                    Log.d("page_pos" , String.valueOf(position));
-                    Log.d("page_size" , String.valueOf(parentQuiz.getQuizList().size()));
                     if(position <= parentQuiz.getQuizList().size() - 1){
-                        Log.d("quizChange" , "sini daf");
                         btnSubmit.setVisibility(View.VISIBLE);
                         btnPrev.setVisibility(View.GONE);
                         btnNext.setVisibility(View.GONE);
@@ -119,23 +113,26 @@ public class ActivityQuizDetail extends AppCompatActivity {
                         cardTitleText.setText(getResources().getString(R.string.title_quiz , String.valueOf(position + 1) , String.valueOf(totalPage)));
                         model_position = position;
                         boolean isCheckedOne = false;
-                        boolean isResult = false;
                         for(int i = 0; i < parentQuiz.getQuizList().get(model_position).getAnswerList().size(); i++){
                             if(parentQuiz.getQuizList().get(model_position).getAnswerList().get(i).isChecked() == 1 &&
                                 parentQuiz.getQuizList().get(model_position).getAnswerList().get(i).getResult() != -1){
                                 isCheckedOne = true;
-                                isResult = true;
+                                lastChoosePosition = i;
                                 break;
                             }
                         }
-                        Log.d("isCheckedOne" , String.valueOf(isCheckedOne));
-                        Log.d("isResult" , String.valueOf(isResult));
-                        if(isCheckedOne && isResult){
-                            Log.d("statusss" , "masuk sini daf");
+                        /*boolean isCheckedOne = parentQuiz.getQuizList().get(model_position).getLastChoosePosition() == -1;
+                        lastChoosePosition = parentQuiz.getQuizList().get(model_position).getLastChoosePosition();
+                        */
+                        Log.d("ISCHECKEDONE" , String.valueOf(isCheckedOne));
+                        Log.d("LAST_CHOOSE" , String.valueOf(lastChoosePosition));
+                        if(isCheckedOne){
                             submitText.setText("NEXT");
                             initializeBtnNext();
                         } else {
-                            Log.d("statusss" , "masuk sini coy");
+                            if(parentQuiz.getQuizList().get(position).getId() != -999){
+                                EventBus.getDefault().postSticky(new FragmentQuiz.PlaySound(parentQuiz.getQuizList().get(position).getId() , parentQuiz.getQuizList().get(position).getSoundResource()));
+                            }
                             initializeBtnSubmit();
                         }
                     }
@@ -190,15 +187,11 @@ public class ActivityQuizDetail extends AppCompatActivity {
             } else if(parentQuiz.getQuizList().size() > 0) {
                 model_position = 0;
                 bgSubmit.setVisibility(View.VISIBLE);
+                Intent soundIntent = new Intent("SOUND_RECEIVER");
+                soundIntent.putExtra("quiz_id" , 0);
+                sendBroadcast(soundIntent);
             }
             initializeBtnSubmit();
-            for(int i = 0; i < parentQuiz.getQuizList().size(); i++){
-                Log.d("QUIZ_QUESTION" , parentQuiz.getQuizList().get(i).getQuestion());
-                for(int j = 0; j < parentQuiz.getQuizList().get(i).getAnswerList().size(); j++){
-                    Answer answer = parentQuiz.getQuizList().get(i).getAnswerList().get(j);
-                    Log.d("QUIZ_JAWABAN" , answer.getAnswer());
-                }
-            }
         } else {
             quizListReview = getIntent().getParcelableArrayListExtra("quiz_list_review");
             icCloseBlue.setVisibility(View.VISIBLE);
@@ -236,7 +229,7 @@ public class ActivityQuizDetail extends AppCompatActivity {
             viewPagerReview.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
                 @Override
                 public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
+                    EventBus.getDefault().post(new FragmentQuiz.StopSound());
                 }
 
                 @Override
@@ -281,7 +274,7 @@ public class ActivityQuizDetail extends AppCompatActivity {
             icCloseBlue.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    finish();
+                    onBackPressed();
                 }
             });
             icMenu.setOnClickListener(new View.OnClickListener() {
@@ -320,9 +313,24 @@ public class ActivityQuizDetail extends AppCompatActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        if(!isReviewQuiz){
+            if(!EventBus.getDefault().isRegistered(this))
+                EventBus.getDefault().register(this);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
+        ActivityQuizDetail.isPlayingMusic = false;
     }
 
     private void addQuizResultPage(){
@@ -343,7 +351,7 @@ public class ActivityQuizDetail extends AppCompatActivity {
                 isSuccess = 0;
             else
                 isSuccess = 1;
-            Quiz result = new Quiz(-999 , "" , 0 , new ArrayList<>() , 0, score_points , isSuccess , 0);
+            Quiz result = new Quiz(-999 , "" , 0 , new ArrayList<>() , 0, score_points , isSuccess , 0, -1);
             parentQuiz.getQuizList().add(result);
             adapter.notifyDataSetChanged();
             if(!isReviewQuiz){
@@ -357,6 +365,7 @@ public class ActivityQuizDetail extends AppCompatActivity {
     public void onEvent(WrapperPosition data){
         Log.d("passed_positions" , String.format("%s AND %s" , String.valueOf(data.model_position) , String.valueOf(data.lastChoosePosition)));
         parentQuiz.getQuizList().get(data.model_position).setAnswerList(data.answerList);
+        parentQuiz.getQuizList().get(data.model_position).setLastChoosePosition(data.lastChoosePosition);
         this.model_position = data.model_position;
         this.lastChoosePosition = data.lastChoosePosition;
     }
@@ -401,6 +410,11 @@ public class ActivityQuizDetail extends AppCompatActivity {
                 viewPager.setCurrentItem(0);
         }
     }
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(FinishQuiz data){
+        EventBus.getDefault().post(new FragmentQuiz.ResetSound());
+        finish();
+    }
 
     static class WrapperPosition {
         int model_position;
@@ -424,6 +438,7 @@ public class ActivityQuizDetail extends AppCompatActivity {
 
     static class WrapperReview {}
     static class WrapperReset {}
+    static class FinishQuiz{}
 
     private void initializeBtnSubmit(){
         submitText.setText("SUBMIT");
@@ -436,16 +451,14 @@ public class ActivityQuizDetail extends AppCompatActivity {
                         break;
                     }
                 }
-                Log.d("lastChoosePositions" , String.valueOf(lastChoosePosition));
-                Log.d("choose_possssS" , String.valueOf(lastChoosePosition));
+                //lastChoosePosition = parentQuiz.getQuizList().get(model_position).getLastChoosePosition();
                 if(lastChoosePosition != -1){
-                    Log.d("choose_pos" , "masuk sini oy");
+                    EventBus.getDefault().post(new FragmentQuiz.StopSound());
                     EventBus.getDefault().post(new FragmentQuiz.TriggerChange(model_position , lastChoosePosition));
                     parentQuiz.getQuizList().get(model_position).setIsResult(1);
                     initializeBtnNext();
                 } else {
                     Toast.makeText(getApplicationContext() , "Pilih Jawaban Dahulu" , Toast.LENGTH_SHORT).show();
-                    Log.d("choose_pos" , "masuk sini daf");
                 }
             }
         });
@@ -460,7 +473,7 @@ public class ActivityQuizDetail extends AppCompatActivity {
                 if(count < parentQuiz.getQuizList().size() - 1){
                     model_position = count + 1;
                     lastChoosePosition = -1;
-                    viewPager.setCurrentItem(count + 1);
+
                     boolean atleast_clicked = false;
                     for(int i = 0; i < parentQuiz.getQuizList().get(count + 1).getAnswerList().size(); i++){
                         if(parentQuiz.getQuizList().get(count + 1).getAnswerList().get(i).isChecked() == 1){
@@ -469,8 +482,11 @@ public class ActivityQuizDetail extends AppCompatActivity {
                         }
                     }
                     if(atleast_clicked){
+                        initializeBtnNext();
+                    } else {
                         initializeBtnSubmit();
                     }
+                    viewPager.setCurrentItem(count + 1);
                 } else {
                     boolean atleast_one = false;
                     for(Quiz quiz : parentQuiz.getQuizList()){
@@ -515,6 +531,7 @@ public class ActivityQuizDetail extends AppCompatActivity {
             @Override
             public void onClick(int position) {
                 if(!isReviewQuiz){
+                    EventBus.getDefault().post(new FragmentQuiz.StopSound());
                     viewPager.setCurrentItem(position);
                     model_position = position;
                     Log.d("question_adapter" , "masuk sini daf");
@@ -535,7 +552,7 @@ public class ActivityQuizDetail extends AppCompatActivity {
     class QuizPagerAdapter extends FragmentStatePagerAdapter {
         private List<Quiz> quizList = new ArrayList<>();
         public QuizPagerAdapter(FragmentManager manager , List<Quiz> quizList){
-            super(manager);
+            super(manager , BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
             this.quizList = quizList;
         }
 

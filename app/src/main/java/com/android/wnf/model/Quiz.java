@@ -15,7 +15,8 @@ public class Quiz implements Parcelable {
     private int isSuccess = 0;
     private int isAnswer = 0;
     private int isResult = -1;
-    public Quiz(int id , String question , int soundResource , ArrayList<Answer> answerList , int isResult , int score_points , int isSuccess , int isAnswer){
+    private int lastChoosePosition;
+    public Quiz(int id , String question , int soundResource , ArrayList<Answer> answerList , int isResult , int score_points , int isSuccess , int isAnswer , int lastChoosePosition){
         this.id = id;
         this.question = question;
         this.soundResource = soundResource;
@@ -24,6 +25,7 @@ public class Quiz implements Parcelable {
         this.score_points = score_points;
         this.isSuccess = isSuccess;
         this.isAnswer = isAnswer;
+        this.lastChoosePosition = lastChoosePosition;
     }
     public int getId(){return id; }
     public String getQuestion(){ return question; }
@@ -32,9 +34,16 @@ public class Quiz implements Parcelable {
     public int isSuccess(){ return isSuccess; }
     public int getIsResult(){ return isResult; }
     public int getIsAnswer(){ return isAnswer; }
+    public int getLastChoosePosition(){ return lastChoosePosition; }
     public ArrayList<Answer> getAnswerList(){ return answerList; }
+    public void setSoundResource(int soundResource){
+        this.soundResource = soundResource;
+    }
     public void setAnswerList(ArrayList<Answer> answerList){
         this.answerList = answerList;
+    }
+    public void setLastChoosePosition(int lastChoosePosition){
+        this.lastChoosePosition = lastChoosePosition;
     }
 
     public void setAnswer(int isAnswer){
