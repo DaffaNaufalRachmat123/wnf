@@ -67,19 +67,17 @@ public class MateriData {
             add(new Materis(0 , "Pengertian Bilangan Pecahan" , 0 , new ArrayList(){{
                 add(new SubMateris(0 , "Pengertian Bilangan Pecahan" , R.drawable.pengertian_bil_pecahan , new ArrayList()));
             }}));
-            add(new Materis(1 , "Macam - Macam Bilangan Pecahan" ,1 , new ArrayList(){{
-                add(new SubMateris( 0 , "Macam - Macam Bilangan Pecahan" , 0 , new ArrayList(){{
-                    add(new SubMaterisData(0 , "Macam - Macam Bilangan Pecahan" , "" , R.drawable.macam_macam_bil_pecahan_1));
-                    add(new SubMaterisData(1 , "Macam - Macam Bilangan Pecahan" , "" , R.drawable.macam_macam_bil_pecahan_2));
-                    add(new SubMaterisData(2 , "Macam - Macam Bilangan Pecahan" , "" , R.drawable.macam_macam_bil_pecahan_3));
-                    add(new SubMaterisData(3 , "Macam - Macam Bilangan Pecahan" , "" , R.drawable.macam_macam_bil_pecahan_4));
-                    add(new SubMaterisData(4 , "Macam - Macam Bilangan Pecahan" , "" , R.drawable.macam_macam_bil_pecahan_5));
-                    add(new SubMaterisData(5 , "Macam - Macam Bilangan Pecahan" , "" , R.drawable.macam_macam_bil_pecahan_6));
-                    add(new SubMaterisData(6 , "Macam - Macam Bilangan Pecahan" , "" , R.drawable.macam_macam_bil_pecahan_7));
-                    add(new SubMaterisData(7 , "Macam - Macam Bilangan Pecahan" , "" , R.drawable.macam_macam_bil_pecahan_8));
-                    add(new SubMaterisData(9 , "Macam - Macam Bilangan Pecahan" , "" , R.drawable.macam_macam_bil_pecahan_9));
-                    add(new SubMaterisData(10 , "Macam - Macam Bilangan Pecahan" , "" , R.drawable.macam_macam_bil_pecahan_10));
-                }}));
+            add(new Materis(1 , "Macam - Macam Bilangan Pecahan" ,0 , new ArrayList(){{
+                add(new SubMateris(0 , "Macam - Macam Bilangan Pecahan"  , R.drawable.macam_macam_bil_pecahan_1 , new ArrayList()));
+                add(new SubMateris(1 , "Macam - Macam Bilangan Pecahan"  , R.drawable.macam_macam_bil_pecahan_2 , new ArrayList()));
+                add(new SubMateris(2 , "Macam - Macam Bilangan Pecahan" , R.drawable.macam_macam_bil_pecahan_3 , new ArrayList()));
+                add(new SubMateris(3 , "Macam - Macam Bilangan Pecahan" , R.drawable.macam_macam_bil_pecahan_4 , new ArrayList()));
+                add(new SubMateris(4 , "Macam - Macam Bilangan Pecahan" , R.drawable.macam_macam_bil_pecahan_5 , new ArrayList()));
+                add(new SubMateris(5 , "Macam - Macam Bilangan Pecahan" , R.drawable.macam_macam_bil_pecahan_6 , new ArrayList()));
+                add(new SubMateris(6 , "Macam - Macam Bilangan Pecahan" , R.drawable.macam_macam_bil_pecahan_7 , new ArrayList()));
+                add(new SubMateris(7 , "Macam - Macam Bilangan Pecahan" , R.drawable.macam_macam_bil_pecahan_8 , new ArrayList()));
+                add(new SubMateris(9 , "Macam - Macam Bilangan Pecahan"  , R.drawable.macam_macam_bil_pecahan_9 , new ArrayList()));
+                add(new SubMateris(10 , "Macam - Macam Bilangan Pecahan" , R.drawable.macam_macam_bil_pecahan_10 , new ArrayList()));
             }}));
             add(new Materis(2 , "Operasi Hitung Pada Bilangan Pecahan" ,1 , new ArrayList(){{
                 add(new SubMateris(0 , "Penjumlahan" , 0 , new ArrayList(){{

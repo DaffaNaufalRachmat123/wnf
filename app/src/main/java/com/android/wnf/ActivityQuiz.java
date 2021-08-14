@@ -11,6 +11,10 @@ import androidx.appcompat.widget.AppCompatButton;
 
 import com.android.wnf.model.Quiz;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +27,7 @@ public class ActivityQuiz extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quiz);
+        EventBus.getDefault().register(this);
         btnQuiz1 = findViewById(R.id.btnQuiz1);
         btnQuiz2 = findViewById(R.id.btnQuiz2);
         btnQuiz3 = findViewById(R.id.btnQuiz3);
@@ -34,6 +39,7 @@ public class ActivityQuiz extends AppCompatActivity {
         btnQuiz1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                stopMusic();
                 startActivity(new Intent(getApplicationContext() , ActivityQuizDetail.class)
                 .putExtra("parent_quiz" , quizData.getParentQuizList().get(0))
                 .putExtra("quiz_position" , 0));
@@ -43,6 +49,7 @@ public class ActivityQuiz extends AppCompatActivity {
         btnQuiz2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                stopMusic();
                 startActivity(new Intent(getApplicationContext() , ActivityQuizDetail.class)
                         .putExtra("parent_quiz" , quizData.getParentQuizList().get(1))
                         .putExtra("quiz_position" , 1));
@@ -52,6 +59,7 @@ public class ActivityQuiz extends AppCompatActivity {
         btnQuiz3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                stopMusic();
                 startActivity(new Intent(getApplicationContext() , ActivityQuizDetail.class)
                         .putExtra("parent_quiz" , quizData.getParentQuizList().get(2))
                         .putExtra("quiz_position" , 2));
@@ -61,6 +69,7 @@ public class ActivityQuiz extends AppCompatActivity {
         btnQuiz4.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                stopMusic();
                 startActivity(new Intent(getApplicationContext() , ActivityQuizDetail.class)
                         .putExtra("parent_quiz" , quizData.getParentQuizList().get(3))
                         .putExtra("quiz_position" , 3));
@@ -73,5 +82,22 @@ public class ActivityQuiz extends AppCompatActivity {
                 onBackPressed();
             }
         });
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(QuizTrigger data){
+
+    }
+
+    static class QuizTrigger {}
+
+    private void stopMusic(){
+        EventBus.getDefault().post(new ActivityHome.StopSound());
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
     }
 }

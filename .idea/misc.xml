@@ -8,6 +8,7 @@
         <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/drawable/bg_badge_false.xml" value="0.19583333333333333" />
         <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/drawable/bg_badge_true.xml" value="0.19583333333333333" />
         <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/drawable/bg_correct.xml" value="0.1" />
+        <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/drawable/bg_home_white.xml" value="0.19583333333333333" />
         <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/drawable/bg_incorrect.xml" value="0.19583333333333333" />
         <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/drawable/bg_selected.xml" value="0.19583333333333333" />
         <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/drawable/bg_status_correct.xml" value="0.19583333333333333" />
@@ -16,7 +17,7 @@
         <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/drawable/ic_launcher_background.xml" value="0.19583333333333333" />
         <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/layout/activity_about.xml" value="0.1" />
         <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/layout/activity_home.xml" value="0.13333333333333333" />
-        <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/layout/activity_main.xml" value="0.1796875" />
+        <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/layout/activity_main.xml" value="0.16666666666666666" />
         <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/layout/activity_parent_materi.xml" value="0.1638888888888889" />
         <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/layout/activity_quiz.xml" value="0.1" />
         <entry key="..\:/Users/naufa/AndroidStudioProject/WNF/app/src/main/res/layout/activity_quiz_detail.xml" value="0.16666666666666666" />
